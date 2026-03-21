@@ -1,21 +1,15 @@
-import Link from "next/link"
+import Link from "next/link";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Activity, AudioWaveform, Brain } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Activity, AudioWaveform, Brain } from "lucide-react";
+import Header from "@/components/landing/header";
+import Footer from "@/components/landing/footer";
 
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b">
-        <div className="flex items-center gap-2">
-          <Activity className="h-6 w-6 text-primary" />
-          <span className="font-semibold text-lg">VoiceUPDRS</span>
-        </div>
-        <ThemeToggle />
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-16">
@@ -24,8 +18,9 @@ export default function Home() {
             Predict Motor UPDRS from Voice Samples
           </h1>
           <p className="mt-6 text-lg text-muted-foreground text-pretty">
-            An AI-powered tool that analyzes voice recordings to predict motor UPDRS 
-            scores for Parkinson's disease patients. Fast, non-invasive, and accurate.
+            An AI-powered tool that analyzes voice recordings to predict motor
+            UPDRS scores for Parkinson's disease patients. Fast, non-invasive,
+            and accurate.
           </p>
 
           <div className="mt-10">
@@ -42,7 +37,8 @@ export default function Home() {
               <AudioWaveform className="h-10 w-10 text-primary mb-4" />
               <h3 className="font-semibold text-lg">Voice Analysis</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Upload voice samples for instant biomarker extraction and analysis.
+                Upload voice samples for instant biomarker extraction and
+                analysis.
               </p>
             </CardContent>
           </Card>
@@ -52,7 +48,8 @@ export default function Home() {
               <Brain className="h-10 w-10 text-primary mb-4" />
               <h3 className="font-semibold text-lg">ML Prediction</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Machine learning model trained on clinical data for accurate predictions.
+                Machine learning model trained on clinical data for accurate
+                predictions.
               </p>
             </CardContent>
           </Card>
@@ -62,7 +59,8 @@ export default function Home() {
               <Activity className="h-10 w-10 text-primary mb-4" />
               <h3 className="font-semibold text-lg">UPDRS Score</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Get predicted motor UPDRS values to help monitor disease progression.
+                Get predicted motor UPDRS values to help monitor disease
+                progression.
               </p>
             </CardContent>
           </Card>
@@ -70,9 +68,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t px-6 py-4 text-center text-sm text-muted-foreground">
-        <p>For research purposes only. Not a substitute for clinical diagnosis.</p>
-      </footer>
+      <Footer />
     </div>
-  )
+  );
 }
