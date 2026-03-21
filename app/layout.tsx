@@ -5,12 +5,12 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "VoiceUPDRS - AI-Powered Parkinson's Voice Analysis",
+  title: "Parkinsons.AI - AI-Powered Parkinson's Voice Analysis",
   description:
     "Predict motor UPDRS scores for Parkinson's patients through advanced voice sample analysis using machine learning.",
   generator: "v0.app",
@@ -39,13 +39,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
-      <body className={`${inter.variable} font-sans antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
+      <body className={cn("font-sans", geist.variable, inter.variable)}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
+          storageKey="parkinsons-theme"
         >
           {children}
         </ThemeProvider>
