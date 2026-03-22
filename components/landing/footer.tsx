@@ -1,5 +1,7 @@
 import React from "react";
 
+const currentYear = new Date().getFullYear();
+
 function Footer() {
   return (
     <>
@@ -7,7 +9,7 @@ function Footer() {
         <p> <em>
 
           Parkinson's AI.<br />
-            &copy; 2024 developed by Xplorers. All rights reserved.
+            &copy; {currentYear} developed by Xplorers. All rights reserved.
           
         </em>
         </p>
