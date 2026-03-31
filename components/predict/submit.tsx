@@ -53,11 +53,11 @@ export default function Submit({ formData }: SubmitProps) {
 
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-foreground mb-2">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
           Confirm and Submit
         </h2>
-        <p className="text-muted-foreground">Ready to analyze your voice sample</p>
+        <p className="text-sm sm:text-base text-muted-foreground">Ready to analyze your voice sample</p>
       </div>
 
       <div className="space-y-6">
@@ -67,21 +67,21 @@ export default function Submit({ formData }: SubmitProps) {
             Submission Summary
           </h3>
           <div className="space-y-3">
-            <div className="flex justify-between items-center py-2 border-b border-border">
-              <span className="text-muted-foreground">Patient</span>
-              <span className="font-medium text-foreground">{formData.fullName}</span>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-border gap-2">
+              <span className="text-xs sm:text-sm text-muted-foreground">Patient</span>
+              <span className="text-sm sm:text-base font-medium text-foreground">{formData.fullName}</span>
             </div>
-            <div className="flex justify-between items-center py-2 border-b border-border">
-              <span className="text-muted-foreground">Age</span>
-              <span className="font-medium text-foreground">{formData.age} years</span>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-border gap-2">
+              <span className="text-xs sm:text-sm text-muted-foreground">Age</span>
+              <span className="text-sm sm:text-base font-medium text-foreground">{formData.age} years</span>
             </div>
-            <div className="flex justify-between items-center py-2 border-b border-border">
-              <span className="text-muted-foreground">Gender</span>
-              <span className="font-medium text-foreground">{formData.gender}</span>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 border-b border-border gap-2">
+              <span className="text-xs sm:text-sm text-muted-foreground">Gender</span>
+              <span className="text-sm sm:text-base font-medium text-foreground">{formData.gender}</span>
             </div>
-            <div className="flex justify-between items-center py-2">
-              <span className="text-muted-foreground">Voice Sample</span>
-              <span className="font-medium text-foreground">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 gap-2">
+              <span className="text-xs sm:text-sm text-muted-foreground">Voice Sample</span>
+              <span className="text-sm sm:text-base font-medium text-foreground">
                 {formData.voiceFile ? 'Uploaded' : 'Pending'}
               </span>
             </div>
@@ -93,7 +93,7 @@ export default function Submit({ formData }: SubmitProps) {
           <h4 className="font-semibold text-foreground mb-3">
             Acknowledgment
           </h4>
-          <div className="space-y-2 text-sm text-foreground">
+          <div className="space-y-2 text-xs sm:text-sm text-foreground">
             <p>✓ I confirm all patient information is accurate</p>
             <p>✓ The voice sample is from the stated patient</p>
             <p>✓ I consent to analyze this data for UPDRS prediction</p>
@@ -118,7 +118,7 @@ export default function Submit({ formData }: SubmitProps) {
         </Button>
 
         {!formData.voiceFile && (
-          <p className="text-sm text-destructive text-center">
+          <p className="text-xs sm:text-sm text-destructive text-center">
             Please upload or record a voice sample before submitting
           </p>
         )}
