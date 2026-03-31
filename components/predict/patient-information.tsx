@@ -1,72 +1,76 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { User, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react'
+import { User, Search } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
 interface PatientInformationProps {
   formData: {
-    fullName: string;
-    age: string;
-    gender: string;
-    testTime: string;
-    patientId?: string;
-    isNewPatient?: boolean;
-  };
-  onFormChange: (field: string, value: string | boolean) => void;
+    fullName: string
+    age: string
+    gender: string
+    testTime: string
+    patientId?: string
+    isNewPatient?: boolean
+  }
+  onFormChange: (field: string, value: string | boolean) => void
 }
 
 export default function PatientInformation({
   formData,
   onFormChange,
 }: PatientInformationProps) {
-  const [mode, setMode] = useState<"new" | "existing">("new");
-  const [searchError, setSearchError] = useState("");
+  const [mode, setMode] = useState<'new' | 'existing'>('new')
+  const [searchError, setSearchError] = useState('')
 
-  const isNewPatient = mode === "new";
+  const isNewPatient = mode === 'new'
 
-  const handleModeChange = (newMode: "new" | "existing") => {
-    setMode(newMode);
-    setSearchError("");
-    onFormChange("isNewPatient", newMode === "new");
-  };
+  const handleModeChange = (newMode: 'new' | 'existing') => {
+    setMode(newMode)
+    setSearchError('')
+    onFormChange('isNewPatient', newMode === 'new')
+  }
 
   const handleSearchPatient = (patientId: string) => {
     if (!patientId.trim()) {
-      setSearchError("Please enter a patient ID");
-      return;
+      setSearchError('Please enter a patient ID')
+      return
     }
     // Simulated patient lookup
-    console.log("[v0] Searching for patient:", patientId);
-    setSearchError("");
-  };
+    console.log('[v0] Searching for patient:', patientId)
+    setSearchError('')
+  }
 
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-foreground mb-2">Information</h2>
-        <p className="text-muted-foreground">Patient details</p>
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
+          Information
+        </h2>
+        <p className="text-sm sm:text-base text-muted-foreground">Patient details</p>
       </div>
 
       {/* Mode Selection */}
-      <div className="flex gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
         <Button
-          variant={isNewPatient ? "default" : "outline"}
-          onClick={() => handleModeChange("new")}
-          className="flex-1"
+          variant={isNewPatient ? 'default' : 'outline'}
+          onClick={() => handleModeChange('new')}
+          className="flex-1 flex items-center justify-center gap-2 text-sm sm:text-base"
         >
-          <User className="w-4 h-4 mr-2" />
-          Register New Patient
+          <User className="w-4 h-4" />
+          <span className="hidden sm:inline">Register New Patient</span>
+          <span className="sm:hidden">Register</span>
         </Button>
         <Button
-          variant={!isNewPatient ? "default" : "outline"}
-          onClick={() => handleModeChange("existing")}
-          className="flex-1"
+          variant={!isNewPatient ? 'default' : 'outline'}
+          onClick={() => handleModeChange('existing')}
+          className="flex-1 flex items-center justify-center gap-2 text-sm sm:text-base"
         >
-          <Search className="w-4 h-4 mr-2" />
-          Find Existing Patient
+          <Search className="w-4 h-4" />
+          <span className="hidden sm:inline">Find Existing Patient</span>
+          <span className="sm:hidden">Find</span>
         </Button>
       </div>
 
@@ -94,7 +98,9 @@ export default function PatientInformation({
             <Search className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h3 className="font-semibold text-foreground mb-1">Find Patient</h3>
+            <h3 className="font-semibold text-foreground mb-1">
+              Find Patient
+            </h3>
             <p className="text-sm text-muted-foreground">
               Search for an existing patient using their ID
             </p>
@@ -113,7 +119,7 @@ export default function PatientInformation({
                 type="text"
                 placeholder="John Doe"
                 value={formData.fullName}
-                onChange={(e) => onFormChange("fullName", e.target.value)}
+                onChange={(e) => onFormChange('fullName', e.target.value)}
                 className="w-full"
               />
             </div>
@@ -125,21 +131,21 @@ export default function PatientInformation({
               <Input
                 type="text"
                 placeholder="e.g., PAT-2024-001"
-                value={formData.patientId || ""}
-                onChange={(e) => onFormChange("patientId", e.target.value)}
+                value={formData.patientId || ''}
+                onChange={(e) => onFormChange('patientId', e.target.value)}
                 className="w-full"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">
                   Gender <span className="text-destructive">*</span>
                 </label>
                 <select
                   value={formData.gender}
-                  onChange={(e) => onFormChange("gender", e.target.value)}
-                  className="w-full px-3 py-2 bg-input border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  onChange={(e) => onFormChange('gender', e.target.value)}
+                  className="w-full px-3 py-2 bg-input border border-border rounded-md text-sm sm:text-base text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">Select gender</option>
                   <option value="Male">Male</option>
@@ -156,7 +162,8 @@ export default function PatientInformation({
                   type="number"
                   placeholder="45"
                   value={formData.age}
-                  onChange={(e) => onFormChange("age", e.target.value)}
+                  onChange={(e) => onFormChange('age', e.target.value)}
+                  className="text-sm sm:text-base"
                 />
               </div>
             </div>
@@ -170,13 +177,13 @@ export default function PatientInformation({
               <Input
                 type="text"
                 placeholder="Enter patient ID"
-                value={formData.patientId || ""}
-                onChange={(e) => onFormChange("patientId", e.target.value)}
+                value={formData.patientId || ''}
+                onChange={(e) => onFormChange('patientId', e.target.value)}
                 className="flex-1"
               />
               <Button
                 type="button"
-                onClick={() => handleSearchPatient(formData.patientId || "")}
+                onClick={() => handleSearchPatient(formData.patientId || '')}
                 className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 Search
@@ -199,7 +206,16 @@ export default function PatientInformation({
             )}
           </div>
         )}
+
+        <Card className="bg-secondary/50 border-0 p-4">
+          <p className="text-sm font-semibold text-foreground mb-1">
+            Privacy Notice:
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Your information and voice sample will be securely transmitted to our analysis servers
+          </p>
+        </Card>
       </div>
     </div>
-  );
+  )
 }

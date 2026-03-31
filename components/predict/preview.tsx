@@ -14,11 +14,11 @@ interface PreviewProps {
 export default function Preview({ formData }: PreviewProps) {
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-foreground mb-2">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
           Preview
         </h2>
-        <p className="text-muted-foreground">Review your recording and information</p>
+        <p className="text-sm sm:text-base text-muted-foreground">Review your recording and information</p>
       </div>
 
       <div className="space-y-6">
@@ -31,22 +31,22 @@ export default function Preview({ formData }: PreviewProps) {
             <h3 className="font-semibold text-foreground">Patient Information</h3>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Full Name</p>
-              <p className="font-medium text-foreground">{formData.fullName || '-'}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Full Name</p>
+              <p className="text-sm sm:text-base font-medium text-foreground">{formData.fullName || '-'}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Age</p>
-              <p className="font-medium text-foreground">{formData.age || '-'}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Age</p>
+              <p className="text-sm sm:text-base font-medium text-foreground">{formData.age || '-'}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Gender</p>
-              <p className="font-medium text-foreground">{formData.gender || '-'}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Gender</p>
+              <p className="text-sm sm:text-base font-medium text-foreground">{formData.gender || '-'}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Test Time (days)</p>
-              <p className="font-medium text-foreground">{formData.testTime || '-'}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Test Time (days)</p>
+              <p className="text-sm sm:text-base font-medium text-foreground">{formData.testTime || '-'}</p>
             </div>
           </div>
         </Card>

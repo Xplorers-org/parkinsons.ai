@@ -1,98 +1,92 @@
-"use client";
+'use client'
 
-import { useState, useRef } from "react";
-import { Mic, Upload, Play, Pause, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { useState, useRef } from 'react'
+import { Mic, Upload, Play, Pause, Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 
 interface VoiceUploadProps {
   formData: {
-    voiceFile?: File;
-    voiceUrl?: string;
-  };
-  onFormChange: (field: string, value: any) => void;
+    voiceFile?: File
+    voiceUrl?: string
+  }
+  onFormChange: (field: string, value: any) => void
 }
 
-export default function VoiceUpload({
-  formData,
-  onFormChange,
-}: VoiceUploadProps) {
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+export default function VoiceUpload({ formData, onFormChange }: VoiceUploadProps) {
+  const [isRecording, setIsRecording] = useState(false)
+  const [recordedUrl, setRecordedUrl] = useState<string | null>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
 
-      const audioChunks: BlobPart[] = [];
+      const audioChunks: BlobPart[] = []
       mediaRecorder.ondataavailable = (event) => {
-        audioChunks.push(event.data);
-      };
+        audioChunks.push(event.data)
+      }
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
-        const url = URL.createObjectURL(audioBlob);
-        setRecordedUrl(url);
-        onFormChange(
-          "voiceFile",
-          new File([audioBlob], "recording.wav", { type: "audio/wav" }),
-        );
-        stream.getTracks().forEach((track) => track.stop());
-      };
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' })
+        const url = URL.createObjectURL(audioBlob)
+        setRecordedUrl(url)
+        onFormChange('voiceFile', new File([audioBlob], 'recording.wav', { type: 'audio/wav' }))
+        stream.getTracks().forEach(track => track.stop())
+      }
 
-      mediaRecorder.start();
-      setIsRecording(true);
+      mediaRecorder.start()
+      setIsRecording(true)
     } catch (error) {
-      console.error("Error accessing microphone:", error);
+      console.error('Error accessing microphone:', error)
     }
-  };
+  }
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
+      mediaRecorderRef.current.stop()
+      setIsRecording(false)
     }
-  };
+  }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0]
     if (file) {
-      const url = URL.createObjectURL(file);
-      setRecordedUrl(url);
-      onFormChange("voiceFile", file);
+      const url = URL.createObjectURL(file)
+      setRecordedUrl(url)
+      onFormChange('voiceFile', file)
     }
-  };
+  }
 
   const togglePlayback = () => {
     if (audioRef.current) {
       if (isPlaying) {
-        audioRef.current.pause();
+        audioRef.current.pause()
       } else {
-        audioRef.current.play();
+        audioRef.current.play()
       }
-      setIsPlaying(!isPlaying);
+      setIsPlaying(!isPlaying)
     }
-  };
+  }
 
   const clearRecording = () => {
-    setRecordedUrl(null);
-    onFormChange("voiceFile", undefined);
-    setIsPlaying(false);
-  };
+    setRecordedUrl(null)
+    onFormChange('voiceFile', undefined)
+    setIsPlaying(false)
+  }
 
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-foreground mb-2">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
           Upload or Record Voice
         </h2>
-        <p className="text-muted-foreground">Voice sample for analysis</p>
+        <p className="text-sm sm:text-base text-muted-foreground">Voice sample for analysis</p>
       </div>
 
       <Card className="bg-secondary/50 border-0 p-6 mb-8 flex items-start gap-4">
@@ -113,22 +107,22 @@ export default function VoiceUpload({
         {/* Recording Controls */}
         {!recordedUrl && (
           <div className="space-y-4">
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Button
                 onClick={isRecording ? stopRecording : startRecording}
-                className={`flex-1 flex items-center justify-center gap-2 ${
+                className={`flex-1 flex items-center justify-center gap-2 text-sm sm:text-base ${
                   isRecording
-                    ? "bg-destructive hover:bg-destructive/90"
-                    : "bg-primary hover:bg-primary/90"
+                    ? 'bg-destructive hover:bg-destructive/90'
+                    : 'bg-primary hover:bg-primary/90'
                 } text-primary-foreground`}
               >
                 <Mic className="w-4 h-4" />
-                {isRecording ? "Stop Recording" : "Start Recording"}
+                {isRecording ? 'Stop Recording' : 'Start Recording'}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex-1 flex items-center justify-center gap-2"
+                className="flex-1 flex items-center justify-center gap-2 text-sm sm:text-base"
               >
                 <Upload className="w-4 h-4" />
                 Upload File
@@ -209,5 +203,5 @@ export default function VoiceUpload({
         )}
       </div>
     </div>
-  );
+  )
 }
