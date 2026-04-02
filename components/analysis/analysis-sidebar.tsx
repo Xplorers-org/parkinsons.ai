@@ -67,12 +67,6 @@ export function AnalysisSidebar({
       completed: completedSteps.includes("gait"),
     },
     {
-      id: "dashboard",
-      label: "Dashboard",
-      icon: LayoutDashboard,
-      href: "/analysis/dashboard",
-    },
-    {
       id: "results",
       label: "Results",
       icon: FileText,
@@ -89,7 +83,7 @@ export function AnalysisSidebar({
         </div>
         <div className="flex items-baseline gap-1">
           <span className="text-xl font-semibold text-sidebar-foreground">
-            NeuroTrack
+            PARKINSON
           </span>
           <span className="text-xl font-bold text-cyan-500">AI</span>
         </div>

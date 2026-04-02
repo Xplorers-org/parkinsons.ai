@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnalysisSidebar } from "@/components/analysis/analysis-sidebar";
 import { Button } from "@/components/ui/button";
-import { Download, Share2, Printer } from "lucide-react";
+import { Download, Share2, Printer, CheckCircle2, Activity, Brain, TrendingUp } from "lucide-react";
 import { PatientData } from "@/components/analysis/patient-info-form";
 
 export default function ResultsPage() {
@@ -94,6 +94,82 @@ export default function ResultsPage() {
             </p>
           </div>
 
+
+          {/* Patient Summary */}
+          <div className="bg-card dark:bg-[#161b26] rounded-2xl border border-border dark:border-white/10 p-6 mb-6">
+            <h3 className="text-lg font-semibold text-foreground dark:text-white mb-4">
+              Patient Summary
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-secondary dark:bg-[#0f1219] rounded-xl p-4">
+                <p className="text-sm text-muted-foreground dark:text-gray-400">Name</p>
+                <p className="font-medium text-foreground dark:text-white">
+                  {patientData?.fullName || "N/A"}
+                </p>
+              </div>
+              <div className="bg-secondary dark:bg-[#0f1219] rounded-xl p-4">
+                <p className="text-sm text-muted-foreground dark:text-gray-400">Patient ID</p>
+                <p className="font-medium text-foreground dark:text-white">
+                  {patientData?.patientId || "N/A"}
+                </p>
+              </div>
+              <div className="bg-secondary dark:bg-[#0f1219] rounded-xl p-4">
+                <p className="text-sm text-muted-foreground dark:text-gray-400">Gender</p>
+                <p className="font-medium text-foreground dark:text-white capitalize">
+                  {patientData?.gender || "N/A"}
+                </p>
+              </div>
+              <div className="bg-secondary dark:bg-[#0f1219] rounded-xl p-4">
+                <p className="text-sm text-muted-foreground dark:text-gray-400">Age</p>
+                <p className="font-medium text-foreground dark:text-white">
+                  {patientData?.age || "N/A"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Analysis Status Cards */}
+          <div className="grid md:grid-cols-3 gap-4 mb-8">
+            <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground dark:text-white">Voice</p>
+                  <p className="text-xs text-green-500">Completed</p>
+                </div>
+              </div>
+              <div className="h-1 bg-green-500 rounded-full" />
+            </div>
+
+            <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Brain className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground dark:text-white">Drawing</p>
+                  <p className="text-xs text-green-500">Completed</p>
+                </div>
+              </div>
+              <div className="h-1 bg-green-500 rounded-full" />
+            </div>
+
+            <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground dark:text-white">Gait</p>
+                  <p className="text-xs text-green-500">Completed</p>
+                </div>
+              </div>
+              <div className="h-1 bg-green-500 rounded-full" />
+            </div>
+          </div>
+
           {/* Individual Results */}
           <div className="space-y-4 mb-8">
             <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-6">
@@ -138,29 +214,6 @@ export default function ResultsPage() {
               <p className="text-sm text-muted-foreground dark:text-gray-400 mt-3">
                 Parkinson's probability based on micro-tremors in spiral and wave drawings.
               </p>
-            </div>
-          </div>
-
-          {/* Patient Info */}
-          <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-6 mb-8">
-            <h3 className="font-semibold text-foreground dark:text-white mb-4">Patient Information</h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-muted-foreground dark:text-gray-400">Name:</span>{" "}
-                <span className="text-foreground dark:text-white">{patientData?.fullName || "N/A"}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground dark:text-gray-400">ID:</span>{" "}
-                <span className="text-foreground dark:text-white">{patientData?.patientId || "N/A"}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground dark:text-gray-400">Age:</span>{" "}
-                <span className="text-foreground dark:text-white">{patientData?.age || "N/A"}</span>
-              </div>
-              <div>
-                <span className="text-muted-foreground dark:text-gray-400">Gender:</span>{" "}
-                <span className="text-foreground dark:text-white capitalize">{patientData?.gender || "N/A"}</span>
-              </div>
             </div>
           </div>
 
