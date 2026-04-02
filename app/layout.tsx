@@ -2,13 +2,14 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Parkinson\'s.AI - AI-Powered Neurological Analysis',
+  title: 'NeuroTrack AI - AI-Powered Neurological Analysis',
   description: 'A multimodal intelligence platform analyzing voice, gait, and handwriting with AI precision to provide unprecedented clarity into neurological health.',
   generator: 'v0.app',
   icons: {
@@ -34,6 +35,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster position="top-right" richColors />
         </ThemeProvider>
         <Analytics />
       </body>

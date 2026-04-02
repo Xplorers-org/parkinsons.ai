@@ -52,7 +52,6 @@ export function AnalysisSidebar({
       href: "/analysis/voice",
       completed: completedSteps.includes("voice"),
     },
-
     {
       id: "drawing",
       label: "Drawing Analysis",
@@ -66,12 +65,6 @@ export function AnalysisSidebar({
       icon: Footprints,
       href: "/analysis/gait",
       completed: completedSteps.includes("gait"),
-    },
-    {
-      id: "dashboard",
-      label: "Dashboard",
-      icon: LayoutDashboard,
-      href: "/analysis/dashboard",
     },
     {
       id: "results",
