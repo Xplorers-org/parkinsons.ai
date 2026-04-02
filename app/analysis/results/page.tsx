@@ -1,12 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnalysisSidebar } from "@/components/analysis/analysis-sidebar";
+import { StepIndicator } from "@/components/analysis/step-indicator";
 import { Button } from "@/components/ui/button";
+import { Download, Eye, FileText } from "lucide-react";
 import { Download, Share2, Printer, CheckCircle2, Activity, Brain, TrendingUp, Loader2, Play } from "lucide-react";
 import { PatientData } from "@/components/analysis/patient-info-form";
 import { toast } from "sonner";
+
+type AnalysisHistoryItem = {
+  id: string;
+  type: "voice" | "gait" | "drawing";
+  source: string;
+  fileName: string;
+  fileSize: string;
+  score: number;
+  severity: string;
+  submittedAt: string;
+};
+
+const resultSteps = [
+  { id: 1, title: "Upload/Record", subtitle: "Voice sample" },
+  { id: 2, title: "Preview", subtitle: "Review your recording" },
+  { id: 3, title: "Submit", subtitle: "Confirm and analyze" },
+  { id: 4, title: "Results", subtitle: "Combined summary" },
+];
 
 export default function ResultsPage() {
   const router = useRouter();
@@ -19,7 +39,6 @@ export default function ResultsPage() {
   
   const completedSteps = ["patient-info", "voice", "drawing", "gait"];
 
-  useEffect(() => {
     const storedData = sessionStorage.getItem("patientData");
     if (storedData) setPatientData(JSON.parse(storedData));
 
@@ -85,198 +104,103 @@ export default function ResultsPage() {
         completedSteps={completedSteps}
         progress={getProgress()}
       />
+const hasVideo = videoFile || recordedBlob;
+const previewVideo = videoFile ?? recordedBlob;
+const showRecordingPreview = isRecording || !!recordedBlob;
 
-      <main className="flex-1 ml-60">
-        <div className="max-w-4xl mx-auto px-8 py-12">
-          {/* Header code stays the same... */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground dark:text-white">
-                Analysis Results
-              </h1>
-              <p className="text-muted-foreground dark:text-gray-400 mt-2">
-                Comprehensive neurological assessment report
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="icon" className="border-border dark:border-white/10">
-                <Share2 className="w-4 h-4" />
-              </Button>
-              <Button variant="outline" size="icon" className="border-border dark:border-white/10">
-                <Printer className="w-4 h-4" />
-              </Button>
-              <Button variant="outline" size="icon" className="border-border dark:border-white/10">
-                <Download className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
+// Utility: format file size
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+};
 
-          {/* Overall Score Banner */}
-          <div className="bg-card dark:bg-[#161b26] rounded-2xl border border-border dark:border-white/10 p-8 mb-6 text-center">
-            <p className="text-muted-foreground dark:text-gray-400 mb-2">Overall Assessment Status</p>
-            <div className="text-4xl font-bold text-primary mb-2">Analysis Complete</div>
-            <p className="text-sm text-muted-foreground dark:text-gray-400">
-              Review individual component scores below
-            </p>
-          </div>
+// 🔥 MAIN FUNCTION (merged + correct)
+const submitAnalysis = async () => {
+  let videoToSubmit = videoFile || recordedBlob;
 
-          {/* Patient Summary */}
-          <div className="bg-card dark:bg-[#161b26] rounded-2xl border border-border dark:border-white/10 p-6 mb-6">
-            <h3 className="text-lg font-semibold text-foreground dark:text-white mb-4">
-              Patient Summary
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-secondary dark:bg-[#0f1219] rounded-xl p-4">
-                <p className="text-sm text-muted-foreground dark:text-gray-400">Name</p>
-                <p className="font-medium text-foreground dark:text-white">
-                  {patientData?.fullName || "N/A"}
-                </p>
-              </div>
-              <div className="bg-secondary dark:bg-[#0f1219] rounded-xl p-4">
-                <p className="text-sm text-muted-foreground dark:text-gray-400">Patient ID</p>
-                <p className="font-medium text-foreground dark:text-white">
-                  {patientData?.patientId || "N/A"}
-                </p>
-              </div>
-              <div className="bg-secondary dark:bg-[#0f1219] rounded-xl p-4">
-                <p className="text-sm text-muted-foreground dark:text-gray-400">Gender</p>
-                <p className="font-medium text-foreground dark:text-white capitalize">
-                  {patientData?.gender || "N/A"}
-                </p>
-              </div>
-              <div className="bg-secondary dark:bg-[#0f1219] rounded-xl p-4">
-                <p className="text-sm text-muted-foreground dark:text-gray-400">Age</p>
-                <p className="font-medium text-foreground dark:text-white">
-                  {patientData?.age || "N/A"}
-                </p>
-              </div>
-            </div>
-          </div>
+  // Validation
+  if (!videoToSubmit) {
+    toast.error("Please upload or record a video.");
+    return;
+  }
 
-          {/* Status Cards */}
-          <div className="grid md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Activity className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground dark:text-white">Voice</p>
-                  <p className="text-xs text-green-500">Completed</p>
-                </div>
-              </div>
-              <div className="h-1 bg-green-500 rounded-full" />
-            </div>
+  if (!sessionId || !patientData) {
+    toast.error("Missing session or patient data.");
+    return;
+  }
 
-            <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Brain className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground dark:text-white">Drawing</p>
-                  <p className="text-xs text-green-500">Completed</p>
-                </div>
-              </div>
-              <div className="h-1 bg-green-500 rounded-full" />
-            </div>
+  // Convert Blob → File (important for FormData)
+  if (recordedBlob && !videoFile) {
+    videoToSubmit = new File([recordedBlob], "recorded_gait.webm", {
+      type: "video/webm",
+    });
+  }
 
-            <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground dark:text-white">Gait</p>
-                  <p className="text-xs text-green-500">Completed</p>
-                </div>
-              </div>
-              <div className="h-1 bg-green-500 rounded-full" />
-            </div>
-          </div>
+  setIsSubmitting(true);
 
-          {/* Individual Results Details */}
-          <div className="space-y-4 mb-8">
-            <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-foreground dark:text-white">Voice Analysis (UPDRS)</h3>
-                <span className="text-2xl font-bold text-green-500">{formatVoiceScore()}</span>
-              </div>
-              <p className="text-sm text-muted-foreground dark:text-gray-400 mt-3">
-                Predicted UPDRS score based on voice features.
-              </p>
-            </div>
+  try {
+    const formData = new FormData();
+    formData.append("session_id", sessionId);
+    formData.append("gender", patientData.gender);
+    formData.append("video", videoToSubmit, "gait_video.mp4");
 
-            <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-foreground dark:text-white">Gait Analysis</h3>
-                <span className="text-2xl font-bold text-yellow-500">{formatGaitScore()}</span>
-              </div>
-              <p className="text-sm text-muted-foreground dark:text-gray-400 mt-3 mb-4">
-                Severity score based on pose estimation variance.
-              </p>
-              
-              {gaitResult?.annotated_video_url && (
-                <div className="mt-4 border-t border-border dark:border-white/10 pt-4">
-                  <h4 className="text-sm font-medium text-foreground dark:text-white mb-3">Pose Estimation (Annotated)</h4>
-                  
-                  {!localVideoUrl ? (
-                    <Button 
-                      onClick={handleDownloadVideo} 
-                      disabled={isDownloading}
-                      variant="outline"
-                      className="w-full max-w-md h-32 flex flex-col gap-2 rounded-xl border-dashed border-2 hover:border-primary/50 hover:bg-primary/5 transition-all"
-                    >
-                      {isDownloading ? (
-                        <>
-                          <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                          <span className="font-medium">Buffering Video...</span>
-                        </>
-                      ) : (
-                        <>
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                            <Play className="w-5 h-5 text-primary fill-primary" />
-                          </div>
-                          <span className="font-medium">Download & Play Annotated Video</span>
-                          <span className="text-xs text-muted-foreground">Load locally for smooth frame-by-frame review</span>
-                        </>
-                      )}
-                    </Button>
-                  ) : (
-                    <div className="relative w-full max-w-md group">
-                      <video
-                        controls
-                        playsInline
-                        autoPlay
-                        src={localVideoUrl}
-                        className="w-full rounded-lg overflow-hidden border border-border dark:border-white/10 shadow-lg"
-                      />
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setLocalVideoUrl(null)}
-                        className="mt-2 text-xs text-muted-foreground hover:text-destructive transition-colors"
-                      >
-                        Reset Video
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+    const res = await fetch("/api/analyze/gait", {
+      method: "POST",
+      body: formData,
+    });
 
-            <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-foreground dark:text-white">Drawing Analysis</h3>
-                <span className="text-2xl font-bold text-red-500">{formatDrawingScore()}</span>
-              </div>
-              <p className="text-sm text-muted-foreground dark:text-gray-400 mt-3">
-                Parkinson's probability based on micro-tremors in spiral and wave drawings.
-              </p>
-            </div>
-          </div>
+    if (!res.ok) {
+      let errorMessage = "Failed to analyze gait";
 
-          {/* Actions */}
+      try {
+        const errorData = await res.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch {
+        // ignore JSON parse error
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    const result = await res.json();
+
+    // Save result
+    sessionStorage.setItem("gaitResult", JSON.stringify(result));
+
+    // Save history
+    const existingHistory = sessionStorage.getItem("analysisHistory");
+    const parsedHistory = existingHistory ? JSON.parse(existingHistory) : [];
+
+    parsedHistory.push({
+      id: `${Date.now()}-gait`,
+      type: "gait",
+      source: videoFile ? "upload" : "webcam-recording",
+      fileName: videoToSubmit.name,
+      fileSize: formatFileSize(videoToSubmit.size),
+      submittedAt: new Date().toISOString(),
+    });
+
+    sessionStorage.setItem("analysisHistory", JSON.stringify(parsedHistory));
+
+    // UI feedback
+    toast.success("Gait analysis complete.");
+
+    setCompletedSteps((prev) => [...prev, "gait"]);
+
+    // Navigate to results
+    router.push("/analysis/results");
+
+  } catch (err) {
+    if (err instanceof Error) {
+      toast.error(err.message);
+    } else {
+      toast.error("Unexpected error occurred.");
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
           <div className="flex gap-4">
             <Button
               variant="outline"
@@ -287,7 +211,8 @@ export default function ResultsPage() {
             </Button>
             <Button
               onClick={() => {
-                sessionStorage.clear();
+                sessionStorage.removeItem("analysisHistory");
+                sessionStorage.removeItem("voiceAnalysisSubmission");
                 router.push("/");
               }}
               className="bg-primary hover:bg-primary/90"
