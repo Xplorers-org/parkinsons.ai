@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnalysisSidebar } from "@/components/analysis/analysis-sidebar";
 import { Button } from "@/components/ui/button";
-import { Download, Share2, Printer, CheckCircle2, Activity, Brain, TrendingUp } from "lucide-react";
+import { Download, Share2, Printer, CheckCircle2, Activity, Brain, TrendingUp, Loader2, Play } from "lucide-react";
 import { PatientData } from "@/components/analysis/patient-info-form";
+import { toast } from "sonner";
 
 export default function ResultsPage() {
   const router = useRouter();
@@ -13,6 +14,8 @@ export default function ResultsPage() {
   const [voiceResult, setVoiceResult] = useState<any>(null);
   const [gaitResult, setGaitResult] = useState<any>(null);
   const [drawingResult, setDrawingResult] = useState<any>(null);
+  const [localVideoUrl, setLocalVideoUrl] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
   
   const completedSteps = ["patient-info", "voice", "drawing", "gait"];
 
@@ -28,10 +31,33 @@ export default function ResultsPage() {
 
     const dResult = sessionStorage.getItem("drawingResult");
     if (dResult) setDrawingResult(JSON.parse(dResult));
-  }, []);
+
+    return () => {
+      if (localVideoUrl) URL.revokeObjectURL(localVideoUrl);
+    };
+  }, [localVideoUrl]);
+
+  const handleDownloadVideo = async () => {
+    if (!gaitResult?.annotated_video_url) return;
+    
+    setIsDownloading(true);
+    try {
+      const response = await fetch(gaitResult.annotated_video_url);
+      if (!response.ok) throw new Error("Could not download video");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      setLocalVideoUrl(url);
+      toast.success("Video ready for playback");
+    } catch (error) {
+      console.error("Video download failed:", error);
+      toast.error("Failed to load video preview");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const getProgress = () => {
-    return { current: 4, total: 4 }; // Results should be 4 out of 4 or 3 out of 3? Wait, completedSteps is 4 items.
+    return { current: 4, total: 4 };
   };
 
   // Safe formatting functions
@@ -47,7 +73,6 @@ export default function ResultsPage() {
 
   const formatDrawingScore = () => {
     if (!drawingResult) return "N/A";
-    // Average spiral and wave probability (0-1) to percentage
     const spiral = Number(drawingResult.spiral?.sigmoid_probability || 0);
     const wave = Number(drawingResult.wave?.sigmoid_probability || 0);
     return (((spiral + wave) / 2) * 100).toFixed(1) + "%";
@@ -63,6 +88,7 @@ export default function ResultsPage() {
 
       <main className="flex-1 ml-60">
         <div className="max-w-4xl mx-auto px-8 py-12">
+          {/* Header code stays the same... */}
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-foreground dark:text-white">
@@ -85,7 +111,7 @@ export default function ResultsPage() {
             </div>
           </div>
 
-          {/* Overall Score */}
+          {/* Overall Score Banner */}
           <div className="bg-card dark:bg-[#161b26] rounded-2xl border border-border dark:border-white/10 p-8 mb-6 text-center">
             <p className="text-muted-foreground dark:text-gray-400 mb-2">Overall Assessment Status</p>
             <div className="text-4xl font-bold text-primary mb-2">Analysis Complete</div>
@@ -93,7 +119,6 @@ export default function ResultsPage() {
               Review individual component scores below
             </p>
           </div>
-
 
           {/* Patient Summary */}
           <div className="bg-card dark:bg-[#161b26] rounded-2xl border border-border dark:border-white/10 p-6 mb-6">
@@ -128,7 +153,7 @@ export default function ResultsPage() {
             </div>
           </div>
 
-          {/* Analysis Status Cards */}
+          {/* Status Cards */}
           <div className="grid md:grid-cols-3 gap-4 mb-8">
             <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-5">
               <div className="flex items-center gap-3 mb-3">
@@ -170,7 +195,7 @@ export default function ResultsPage() {
             </div>
           </div>
 
-          {/* Individual Results */}
+          {/* Individual Results Details */}
           <div className="space-y-4 mb-8">
             <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-6">
               <div className="flex items-center justify-between mb-4">
@@ -193,15 +218,49 @@ export default function ResultsPage() {
               
               {gaitResult?.annotated_video_url && (
                 <div className="mt-4 border-t border-border dark:border-white/10 pt-4">
-                  <h4 className="text-sm font-medium text-foreground dark:text-white mb-2">Pose Estimation (Annotated)</h4>
-                  <video
-                    controls
-                    playsInline
-                    preload="metadata"
-                    crossOrigin="anonymous"
-                    src={gaitResult.annotated_video_url}
-                    className="w-full max-w-md rounded-lg overflow-hidden border border-border dark:border-white/10 shadow-sm"
-                  />
+                  <h4 className="text-sm font-medium text-foreground dark:text-white mb-3">Pose Estimation (Annotated)</h4>
+                  
+                  {!localVideoUrl ? (
+                    <Button 
+                      onClick={handleDownloadVideo} 
+                      disabled={isDownloading}
+                      variant="outline"
+                      className="w-full max-w-md h-32 flex flex-col gap-2 rounded-xl border-dashed border-2 hover:border-primary/50 hover:bg-primary/5 transition-all"
+                    >
+                      {isDownloading ? (
+                        <>
+                          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                          <span className="font-medium">Buffering Video...</span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
+                            <Play className="w-5 h-5 text-primary fill-primary" />
+                          </div>
+                          <span className="font-medium">Download & Play Annotated Video</span>
+                          <span className="text-xs text-muted-foreground">Load locally for smooth frame-by-frame review</span>
+                        </>
+                      )}
+                    </Button>
+                  ) : (
+                    <div className="relative w-full max-w-md group">
+                      <video
+                        controls
+                        playsInline
+                        autoPlay
+                        src={localVideoUrl}
+                        className="w-full rounded-lg overflow-hidden border border-border dark:border-white/10 shadow-lg"
+                      />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setLocalVideoUrl(null)}
+                        className="mt-2 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        Reset Video
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
