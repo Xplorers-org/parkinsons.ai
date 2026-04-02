@@ -25,11 +25,15 @@ export default function GaitAnalysisPage() {
   const [completedSteps, setCompletedSteps] = useState<string[]>(["patient-info", "voice"]);
   
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [patientData, setPatientData] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const storedSession = sessionStorage.getItem("sessionId");
     if (storedSession) setSessionId(storedSession);
+
+    const storedPatient = sessionStorage.getItem("patientData");
+    if (storedPatient) setPatientData(JSON.parse(storedPatient));
   }, []);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,8 +48,8 @@ export default function GaitAnalysisPage() {
 
   const submitAnalysis = async () => {
     const videoToSubmit = videoFile || recordedBlob;
-    if (!videoToSubmit || !sessionId) {
-      toast.error("Missing video or session data.");
+    if (!videoToSubmit || !sessionId || !patientData) {
+      toast.error("Missing video, session, or patient data.");
       return;
     }
 
@@ -53,6 +57,7 @@ export default function GaitAnalysisPage() {
     try {
       const formData = new FormData();
       formData.append("session_id", sessionId);
+      formData.append("gender", patientData.gender);
       formData.append("video", videoToSubmit, "gait_video.mp4");
 
       const res = await fetch("/api/analyze/gait", {

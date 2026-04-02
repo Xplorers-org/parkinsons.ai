@@ -111,9 +111,20 @@ export default function ResultsPage() {
                 <h3 className="font-semibold text-foreground dark:text-white">Gait Analysis</h3>
                 <span className="text-2xl font-bold text-yellow-500">{formatGaitScore()}</span>
               </div>
-              <p className="text-sm text-muted-foreground dark:text-gray-400 mt-3">
+              <p className="text-sm text-muted-foreground dark:text-gray-400 mt-3 mb-4">
                 Severity score based on pose estimation variance.
               </p>
+              
+              {gaitResult?.annotated_video_url && (
+                <div className="mt-4 border-t border-border dark:border-white/10 pt-4">
+                  <h4 className="text-sm font-medium text-foreground dark:text-white mb-2">Pose Estimation (Annotated)</h4>
+                  <video
+                    controls
+                    src={gaitResult.annotated_video_url}
+                    className="w-full max-w-md rounded-lg overflow-hidden border border-border dark:border-white/10 shadow-sm"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-6">
