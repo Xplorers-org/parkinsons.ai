@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { AnalysisSidebar } from "@/components/analysis/analysis-sidebar";
 import { StepIndicator } from "@/components/analysis/step-indicator";
 import { Button } from "@/components/ui/button";
-import { Upload, Video, VideoOff, Loader2 } from "lucide-react";
+import { CircleCheck, Upload, Video, VideoOff, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -28,9 +28,13 @@ export default function GaitAnalysisPage() {
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
-  
-  const [completedSteps, setCompletedSteps] = useState<string[]>(["patient-info", "voice", "drawing"]);
-  
+
+  const [completedSteps, setCompletedSteps] = useState<string[]>([
+    "patient-info",
+    "voice",
+    "drawing",
+  ]);
+
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [patientData, setPatientData] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,29 +67,29 @@ export default function GaitAnalysisPage() {
 
   const stopStream = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
   };
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
           facingMode: "user",
           width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }, 
-        audio: false 
+          height: { ideal: 720 },
+        },
+        audio: false,
       });
-      
+
       streamRef.current = stream;
       if (videoPreviewRef.current) {
         videoPreviewRef.current.srcObject = stream;
       }
 
       const recorder = new MediaRecorder(stream, {
-        mimeType: "video/webm;codecs=vp8"
+        mimeType: "video/webm;codecs=vp8",
       });
 
       recorder.ondataavailable = (e) => {
@@ -119,7 +123,6 @@ export default function GaitAnalysisPage() {
     }
   };
 
-
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isRecording || recordedBlob) {
       return;
@@ -146,80 +149,6 @@ export default function GaitAnalysisPage() {
     setRecordedBlob(null);
   };
 
-  const stopWebcam = () => {
-    setWebcamStream((currentStream) => {
-      currentStream?.getTracks().forEach((track) => track.stop());
-      return null;
-    });
-  };
-
-  const startRecording = async () => {
-    if (videoFile || recordedBlob || isRecording) {
-      return;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      setWebcamStream(stream);
-
-      if (webcamVideoRef.current) {
-        webcamVideoRef.current.srcObject = stream;
-      }
-
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          chunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "video/webm" });
-        setRecordedBlob(blob);
-        setVideoFile(null);
-        stopWebcam();
-      };
-
-      mediaRecorder.start();
-      setIsRecording(true);
-
-      timerRef.current = setTimeout(() => {
-        stopRecording();
-      }, 30000);
-    } catch (error) {
-      console.error("Error accessing webcam:", error);
-      stopWebcam();
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (webcamVideoRef.current && webcamStream) {
-      webcamVideoRef.current.srcObject = webcamStream;
-    }
-  }, [webcamStream]);
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-      stopWebcam();
-    };
-  }, []);
-
   const hasVideo = videoFile || recordedBlob;
   const previewVideo = videoFile ?? recordedBlob;
   const showRecordingPreview = isRecording || !!recordedBlob;
@@ -233,7 +162,9 @@ export default function GaitAnalysisPage() {
 
     // Convert blob to file for standard FormData handling
     if (recordedBlob && !videoFile) {
-      videoToSubmit = new File([recordedBlob], "recorded_gait.webm", { type: "video/webm" });
+      videoToSubmit = new File([recordedBlob], "recorded_gait.webm", {
+        type: "video/webm",
+      });
     }
 
     setIsSubmitting(true);
@@ -256,7 +187,7 @@ export default function GaitAnalysisPage() {
       const result = await res.json();
       sessionStorage.setItem("gaitResult", JSON.stringify(result));
       toast.success("Gait analysis complete.");
-      
+
       setCompletedSteps([...completedSteps, "gait"]);
       router.push("/analysis/results");
     } catch (err) {
@@ -311,7 +242,7 @@ export default function GaitAnalysisPage() {
                       "rounded-xl border-2 border-dashed p-8 text-center transition-all duration-200",
                       videoFile
                         ? "border-primary bg-primary/5"
-                        : "border-border dark:border-white/20 hover:border-primary/50"
+                        : "border-border dark:border-white/20 hover:border-primary/50",
                     )}
                   >
                     <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-secondary dark:bg-white/5 flex items-center justify-center">
@@ -359,38 +290,53 @@ export default function GaitAnalysisPage() {
                       "rounded-xl border-2 border-dashed p-6 text-center transition-all duration-200 overflow-hidden flex flex-col justify-center min-h-[300px]",
                       isRecording
                         ? "border-primary bg-black/40"
-                        : recordedBlob 
-                        ? "border-green-500/50 bg-green-500/5"
-                        : "border-border dark:border-white/20 hover:border-primary/50"
+                        : recordedBlob
+                          ? "border-green-500/50 bg-green-500/5"
+                          : "border-border dark:border-white/20 hover:border-primary/50",
                     )}
                   >
                     {isRecording ? (
                       <div className="relative rounded-lg overflow-hidden mb-4 aspect-video bg-black">
-                        <video 
-                          ref={videoPreviewRef} 
-                          autoPlay 
-                          muted 
-                          playsInline 
+                        <video
+                          ref={videoPreviewRef}
+                          autoPlay
+                          muted
+                          playsInline
                           className="w-full h-full object-cover scale-x-[-1]"
                         />
                         <div className="absolute top-3 left-3 flex items-center gap-2 px-2 py-1 bg-black/60 rounded-md">
                           <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                          <span className="text-[10px] font-bold text-white uppercase tracking-wider">Recording</span>
+                          <span className="text-[10px] font-bold text-white uppercase tracking-wider">
+                            Recording
+                          </span>
                         </div>
                       </div>
                     ) : (
                       <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-secondary dark:bg-white/5 flex items-center justify-center">
-                        <Video className={cn("w-7 h-7", recordedBlob ? "text-green-500" : "text-muted-foreground dark:text-gray-400")} />
+                        <Video
+                          className={cn(
+                            "w-7 h-7",
+                            recordedBlob
+                              ? "text-green-500"
+                              : "text-muted-foreground dark:text-gray-400",
+                          )}
+                        />
                       </div>
                     )}
-                    
+
                     <h4 className="text-lg font-medium text-foreground dark:text-white mb-2">
-                      {isRecording ? "Capturing Gait..." : recordedBlob ? "Video Captured" : "Record Video"}
+                      {isRecording
+                        ? "Capturing Gait..."
+                        : recordedBlob
+                          ? "Video Captured"
+                          : "Record Video"}
                     </h4>
 
                     {!isRecording && (
                       <p className="text-sm text-muted-foreground dark:text-gray-400 mb-5">
-                        {recordedBlob ? "You can review it or record again" : "Record walking video"}
+                        {recordedBlob
+                          ? "You can review it or record again"
+                          : "Record walking video"}
                       </p>
                     )}
                     <Button
@@ -400,7 +346,7 @@ export default function GaitAnalysisPage() {
 
                         isRecording
                           ? "bg-destructive hover:bg-destructive/90 transition-all duration-300 scale-105"
-                          : "bg-primary hover:bg-primary/90"
+                          : "bg-primary hover:bg-primary/90",
                       )}
                     >
                       {isRecording ? (
@@ -416,7 +362,9 @@ export default function GaitAnalysisPage() {
                       )}
                     </Button>
                     {recordedBlob && !isRecording && (
-                      <p className="text-xs text-green-500 mt-3 animate-bounce">✓ Video recorded successfully</p>
+                      <p className="text-xs text-green-500 mt-3 animate-bounce">
+                        ✓ Video recorded successfully
+                      </p>
                     )}
                   </div>
                 </div>
@@ -424,7 +372,8 @@ export default function GaitAnalysisPage() {
 
               <div className="mt-6 bg-amber-500/10 dark:bg-amber-900/20 border border-amber-500/30 dark:border-amber-500/20 rounded-xl px-5 py-4">
                 <p className="text-sm text-amber-700 dark:text-amber-400">
-                  <span className="font-semibold">Note:</span> Please ensure the full body is visible in the video for accurate gait analysis.
+                  <span className="font-semibold">Note:</span> Please ensure the
+                  full body is visible in the video for accurate gait analysis.
                 </p>
               </div>
 
@@ -443,7 +392,7 @@ export default function GaitAnalysisPage() {
                     "px-8",
                     hasVideo && !isRecording
                       ? "bg-primary hover:bg-primary/90"
-                      : "bg-muted dark:bg-white/10 text-muted-foreground dark:text-gray-500 cursor-not-allowed"
+                      : "bg-muted dark:bg-white/10 text-muted-foreground dark:text-gray-500 cursor-not-allowed",
                   )}
                 >
                   Next
@@ -460,7 +409,7 @@ export default function GaitAnalysisPage() {
               <p className="text-sm text-muted-foreground dark:text-gray-400 mb-6">
                 Review your video
               </p>
-              
+
               {videoUrl && (
                 <div className="bg-secondary dark:bg-[#0f1219] rounded-xl p-6 mb-6">
                   <video
@@ -468,7 +417,6 @@ export default function GaitAnalysisPage() {
                     src={videoUrl}
                     className="w-full rounded-lg"
                   />
-
                 </div>
               )}
 
@@ -501,8 +449,12 @@ export default function GaitAnalysisPage() {
 
               <div className="bg-secondary dark:bg-[#0f1219] rounded-xl p-6 mb-6">
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-muted-foreground dark:text-gray-400">Video Status</span>
-                  <span className="font-medium text-primary">Ready for analysis</span>
+                  <span className="text-muted-foreground dark:text-gray-400">
+                    Video Status
+                  </span>
+                  <span className="font-medium text-primary">
+                    Ready for analysis
+                  </span>
                 </div>
               </div>
 
