@@ -15,6 +15,7 @@ const voiceSteps = [
   { id: 1, title: "Upload/Record", subtitle: "Voice sample" },
   { id: 2, title: "Preview", subtitle: "Review your recording" },
   { id: 3, title: "Submit", subtitle: "Confirm and analyze" },
+  { id: 4, title: "Results", subtitle: "View your results" },
 ];
 
 type VoiceAnalysisResult = {
