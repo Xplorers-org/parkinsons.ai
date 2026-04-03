@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnalysisSidebar } from "@/components/analysis/analysis-sidebar";
+import { AnalysisCompleteDialog } from "@/components/analysis/analysis-complete-dialog";
 import { StepIndicator } from "@/components/analysis/step-indicator";
 import { VoiceAnalysis } from "@/components/analysis/voice-analysis";
 import { PatientData } from "@/components/analysis/patient-info-form";
@@ -477,87 +478,6 @@ export default function VoiceAnalysisPage() {
                 </div>
               </div>
 
-              <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-6">
-                <h4 className="text-lg font-semibold text-foreground dark:text-white mb-3">
-                  Debug API Data (Temporary)
-                </h4>
-                <p className="text-xs text-muted-foreground dark:text-gray-400 mb-3">
-                  Use this panel to verify the exact response returned by{" "}
-                  <span className="font-mono">/api/analyze/voice</span>.
-                </p>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground dark:text-gray-400">
-                      prediction
-                    </span>
-                    <span className="text-foreground dark:text-white font-medium">
-                      {voiceResult?.prediction ?? "N/A"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground dark:text-gray-400">
-                      test_count
-                    </span>
-                    <span className="text-foreground dark:text-white font-medium">
-                      {voiceResult?.test_count ?? "N/A"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground dark:text-gray-400">
-                      processing_time_ms
-                    </span>
-                    <span className="text-foreground dark:text-white font-medium">
-                      {voiceResult?.processing_time_ms ?? "N/A"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground dark:text-gray-400">
-                      saved
-                    </span>
-                    <span className="text-foreground dark:text-white font-medium">
-                      {String(voiceResult?.saved ?? "N/A")}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-card dark:bg-[#161b26] rounded-2xl border border-border dark:border-white/10 p-6">
-                <h4 className="text-2xl font-semibold text-foreground dark:text-white mb-4">
-                  Submission Summary
-                </h4>
-                <div className="grid sm:grid-cols-2 gap-4 text-base">
-                  <p className="text-muted-foreground dark:text-gray-400">
-                    Patient:
-                  </p>
-                  <p className="text-foreground dark:text-white font-semibold">
-                    {patientData?.fullName || "N/A"}
-                  </p>
-
-                  <p className="text-muted-foreground dark:text-gray-400">
-                    Age:
-                  </p>
-                  <p className="text-foreground dark:text-white font-semibold">
-                    {patientData?.age || "N/A"} years
-                  </p>
-
-                  <p className="text-muted-foreground dark:text-gray-400">
-                    Gender:
-                  </p>
-                  <p className="text-foreground dark:text-white font-semibold capitalize">
-                    {patientData?.gender || "N/A"}
-                  </p>
-
-                  <p className="text-muted-foreground dark:text-gray-400">
-                    Audio:
-                  </p>
-                  <p className="text-foreground dark:text-white font-semibold break-all">
-                    {audioData
-                      ? `${audioData instanceof File ? audioData.name : "recorded-sample.webm"} (${formatFileSize(audioData.size)})`
-                      : "N/A"}
-                  </p>
-                </div>
-              </div>
-
               <div className="flex justify-between mt-8">
                 <Button
                   variant="secondary"
@@ -578,6 +498,24 @@ export default function VoiceAnalysisPage() {
           )}
         </div>
       </main>
+
+      <AnalysisCompleteDialog
+        open={resultActionsOpen}
+        onOpenChange={setResultActionsOpen}
+        completedAnalysisLabel="voice"
+        primaryActions={[
+          {
+            label: "Continue to Drawing Analysis",
+            onClick: () => closeDialogAndNavigate("/analysis/drawing"),
+          },
+          {
+            label: "Continue to Gait Analysis",
+            onClick: () => closeDialogAndNavigate("/analysis/gait"),
+          },
+        ]}
+        onViewCurrentResult={handleGoToCurrentVoiceResult}
+        onViewDashboard={() => closeDialogAndNavigate("/analysis/dashboard")}
+      />
     </div>
   );
 }

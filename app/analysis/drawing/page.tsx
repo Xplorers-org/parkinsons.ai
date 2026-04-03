@@ -45,16 +45,22 @@ export default function DrawingAnalysisPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [resultActionsOpen, setResultActionsOpen] = useState(false);
-  const [patientData, setPatientData] = useState<PatientSessionData | null>(null);
+  const [patientData, setPatientData] = useState<PatientSessionData | null>(
+    null,
+  );
   const [spiralFile, setSpiralFile] = useState<File | null>(null);
   const [waveFile, setWaveFile] = useState<File | null>(null);
   const spiralInputRef = useRef<HTMLInputElement>(null);
   const waveInputRef = useRef<HTMLInputElement>(null);
-  const [completedSteps, setCompletedSteps] = useState<string[]>(["patient-info", "voice"]);
+  const [completedSteps, setCompletedSteps] = useState<string[]>([
+    "patient-info",
+    "voice",
+  ]);
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [drawingResult, setDrawingResult] = useState<StoredDrawingResult | null>(null);
+  const [drawingResult, setDrawingResult] =
+    useState<StoredDrawingResult | null>(null);
 
   useEffect(() => {
     const storedSession = sessionStorage.getItem("sessionId");
@@ -104,7 +110,11 @@ export default function DrawingAnalysisPage() {
   };
 
   const previewFile = spiralFile ?? waveFile;
-  const previewLabel = spiralFile ? "Spiral Drawing" : waveFile ? "Wave Drawing" : "Drawing Preview";
+  const previewLabel = spiralFile
+    ? "Spiral Drawing"
+    : waveFile
+      ? "Wave Drawing"
+      : "Drawing Preview";
   const previewType = spiralFile ? "spiral" : waveFile ? "wave" : "";
 
   const hasUploads = Boolean(spiralFile || waveFile);
@@ -127,8 +137,10 @@ export default function DrawingAnalysisPage() {
   };
 
   const getSeverityDescription = (severity: string) => {
-    if (severity === "Stable") return "Drawing control appears relatively steady.";
-    if (severity === "Mild irregularity") return "Some tremor or fine motor variation may be present.";
+    if (severity === "Stable")
+      return "Drawing control appears relatively steady.";
+    if (severity === "Mild irregularity")
+      return "Some tremor or fine motor variation may be present.";
     return "Clear motor irregularity may be present.";
   };
 
@@ -174,10 +186,13 @@ export default function DrawingAnalysisPage() {
 
       const result: DrawingAnalysisResult = await res.json();
       setDrawingResult({ [drawingType]: result });
-      sessionStorage.setItem("drawingResult", JSON.stringify({ [drawingType]: result }));
+      sessionStorage.setItem(
+        "drawingResult",
+        JSON.stringify({ [drawingType]: result }),
+      );
 
       toast.success("Drawing analysis complete.");
-      
+
       setCompletedSteps([...completedSteps, "drawing"]);
       setStep(4);
     } catch (err) {
@@ -194,9 +209,12 @@ export default function DrawingAnalysisPage() {
   const activeResult = drawingResult?.spiral ?? drawingResult?.wave;
   const activeScore = activeResult?.motor_impairment_score;
   const activeSeverity =
-    typeof activeScore === "number" ? getSeverityFromScore(activeScore) : "Pending";
+    typeof activeScore === "number"
+      ? getSeverityFromScore(activeScore)
+      : "Pending";
   const activeSeverityDescription = getSeverityDescription(activeSeverity);
-  const activeScoreText = typeof activeScore === "number" ? activeScore.toFixed(1) : "N/A";
+  const activeScoreText =
+    typeof activeScore === "number" ? activeScore.toFixed(1) : "N/A";
   const activeProgressWidth =
     typeof activeScore === "number"
       ? `${Math.max(0, Math.min(activeScore, 100)).toFixed(2)}%`
@@ -239,7 +257,7 @@ export default function DrawingAnalysisPage() {
                       "rounded-xl border-2 border-dashed p-8 text-center transition-all duration-200",
                       spiralFile
                         ? "border-primary bg-primary/5"
-                        : "border-border dark:border-white/20 hover:border-primary/50"
+                        : "border-border dark:border-white/20 hover:border-primary/50",
                     )}
                   >
                     <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-secondary dark:bg-white/5 flex items-center justify-center">
@@ -287,7 +305,7 @@ export default function DrawingAnalysisPage() {
                       "rounded-xl border-2 border-dashed p-8 text-center transition-all duration-200",
                       waveFile
                         ? "border-primary bg-primary/5"
-                        : "border-border dark:border-white/20 hover:border-primary/50"
+                        : "border-border dark:border-white/20 hover:border-primary/50",
                     )}
                   >
                     <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-secondary dark:bg-white/5 flex items-center justify-center">
@@ -334,7 +352,9 @@ export default function DrawingAnalysisPage() {
 
               <div className="mt-6 bg-amber-500/10 dark:bg-amber-900/20 border border-amber-500/30 dark:border-amber-500/20 rounded-xl px-5 py-4">
                 <p className="text-sm text-amber-700 dark:text-amber-400">
-                  <span className="font-semibold">Note:</span> Upload one drawing only spiral or wave. Remove the current file before choosing another one.
+                  <span className="font-semibold">Note:</span> Upload one
+                  drawing only spiral or wave. Remove the current file before
+                  choosing another one.
                 </p>
               </div>
 
@@ -353,7 +373,7 @@ export default function DrawingAnalysisPage() {
                     "px-8",
                     hasUploads
                       ? "bg-primary hover:bg-primary/90"
-                      : "bg-muted dark:bg-white/10 text-muted-foreground dark:text-gray-500 cursor-not-allowed"
+                      : "bg-muted dark:bg-white/10 text-muted-foreground dark:text-gray-500 cursor-not-allowed",
                   )}
                 >
                   Next
@@ -372,7 +392,9 @@ export default function DrawingAnalysisPage() {
               </p>
 
               <div className="bg-secondary dark:bg-[#0f1219] rounded-xl p-4">
-                <p className="mb-3 text-sm font-medium text-foreground dark:text-white">{previewLabel}</p>
+                <p className="mb-3 text-sm font-medium text-foreground dark:text-white">
+                  {previewLabel}
+                </p>
                 {previewFile ? (
                   <div className="space-y-4">
                     <Image
@@ -388,11 +410,12 @@ export default function DrawingAnalysisPage() {
                         <CircleCheck className="w-4 h-4 shrink-0" />
                         <span className="truncate">{previewFile.name}</span>
                       </p>
-                    
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground dark:text-gray-400">No drawing uploaded</p>
+                  <p className="text-sm text-muted-foreground dark:text-gray-400">
+                    No drawing uploaded
+                  </p>
                 )}
               </div>
 
@@ -426,7 +449,9 @@ export default function DrawingAnalysisPage() {
                   </h3>
                 </div>
                 <p className="text-md text-muted-foreground dark:text-gray-300 max-w-3xl mx-auto">
-                  Your selected drawing will be analyzed to assess fine motor control, tremor patterns, and movement stability related to Parkinson&apos;s disease.
+                  Your selected drawing will be analyzed to assess fine motor
+                  control, tremor patterns, and movement stability related to
+                  Parkinson&apos;s disease.
                 </p>
               </div>
 
@@ -435,17 +460,35 @@ export default function DrawingAnalysisPage() {
                   Submission Summary
                 </h4>
                 <div className="grid sm:grid-cols-2 gap-4 text-base">
-                  <p className="text-muted-foreground dark:text-gray-400">Patient:</p>
-                  <p className="text-foreground dark:text-white font-semibold">{patientData?.fullName || "N/A"}</p>
+                  <p className="text-muted-foreground dark:text-gray-400">
+                    Patient:
+                  </p>
+                  <p className="text-foreground dark:text-white font-semibold">
+                    {patientData?.fullName || "N/A"}
+                  </p>
 
-                  <p className="text-muted-foreground dark:text-gray-400">Age:</p>
-                  <p className="text-foreground dark:text-white font-semibold">{patientData?.age || "N/A"}</p>
+                  <p className="text-muted-foreground dark:text-gray-400">
+                    Age:
+                  </p>
+                  <p className="text-foreground dark:text-white font-semibold">
+                    {patientData?.age || "N/A"}
+                  </p>
 
-                  <p className="text-muted-foreground dark:text-gray-400">Gender:</p>
-                  <p className="text-foreground dark:text-white font-semibold capitalize">{patientData?.gender || "N/A"}</p>
+                  <p className="text-muted-foreground dark:text-gray-400">
+                    Gender:
+                  </p>
+                  <p className="text-foreground dark:text-white font-semibold capitalize">
+                    {patientData?.gender || "N/A"}
+                  </p>
 
-                  <p className="text-muted-foreground dark:text-gray-400">Drawing:</p>
-                  <p className="text-foreground dark:text-white font-semibold break-all">{previewFile ? `${previewLabel} (${formatFileSize(previewFile.size)})` : "N/A"}</p>
+                  <p className="text-muted-foreground dark:text-gray-400">
+                    Drawing:
+                  </p>
+                  <p className="text-foreground dark:text-white font-semibold break-all">
+                    {previewFile
+                      ? `${previewLabel} (${formatFileSize(previewFile.size)})`
+                      : "N/A"}
+                  </p>
                 </div>
               </div>
 
@@ -455,9 +498,16 @@ export default function DrawingAnalysisPage() {
                 </h4>
                 <ul className="space-y-2 text-muted-foreground dark:text-gray-300 list-disc list-inside">
                   <li>Drawing scores range from 0 to 100.</li>
-                  <li>Lower scores indicate steadier, more controlled drawing motion.</li>
-                  <li>Spiral drawings help assess tremor and fine motor symmetry.</li>
-                  <li>Wave drawings help assess rhythm and movement consistency.</li>
+                  <li>
+                    Lower scores indicate steadier, more controlled drawing
+                    motion.
+                  </li>
+                  <li>
+                    Spiral drawings help assess tremor and fine motor symmetry.
+                  </li>
+                  <li>
+                    Wave drawings help assess rhythm and movement consistency.
+                  </li>
                 </ul>
               </div>
 
@@ -497,19 +547,26 @@ export default function DrawingAnalysisPage() {
                       Analysis Results
                     </h3>
                     <p className="text-sm text-muted-foreground dark:text-gray-400 mt-2">
-                      Detailed results of your drawing analysis for Parkinson&apos;s disease screening.
+                      Detailed results of your drawing analysis for
+                      Parkinson&apos;s disease screening.
                     </p>
                   </div>
                   <Upload className="w-6 h-6 text-amber-500 shrink-0" />
                 </div>
 
                 <div className="mt-6 rounded-xl border border-primary/40 dark:border-primary/30 border-l-4 p-5 bg-primary/5 dark:bg-primary/10">
-                  <h4 className="text-xl font-semibold text-primary mb-2">Analysis Complete</h4>
+                  <h4 className="text-xl font-semibold text-primary mb-2">
+                    Analysis Complete
+                  </h4>
                   <p className="text-sm text-foreground dark:text-white">
-                    Patient: <span className="font-semibold text-primary">{patientData?.fullName || "N/A"}</span>
+                    Patient:{" "}
+                    <span className="font-semibold text-primary">
+                      {patientData?.fullName || "N/A"}
+                    </span>
                   </p>
                   <p className="text-lg font-semibold text-foreground dark:text-white mt-2">
-                    Drawing Score: <span className="text-amber-500">{activeScoreText}</span>
+                    Drawing Score:{" "}
+                    <span className="text-amber-500">{activeScoreText}</span>
                     <span className="text-muted-foreground"> / 100</span>
                     <span className="ml-3 text-xs bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 px-2.5 py-1 rounded-full align-middle">
                       {activeSeverity}
@@ -518,18 +575,27 @@ export default function DrawingAnalysisPage() {
                 </div>
 
                 <div className="mt-6 bg-secondary dark:bg-[#0f1219] rounded-lg p-4 inline-block">
-                  <p className="text-sm text-muted-foreground dark:text-gray-400">Drawing Type</p>
-                  <p className="font-semibold text-foreground dark:text-white">{activeResult?.drawing_type || previewLabel}</p>
-                  <p className="text-sm text-primary mt-1">Drawing Score: {activeScoreText}</p>
+                  <p className="text-sm text-muted-foreground dark:text-gray-400">
+                    Drawing Type
+                  </p>
+                  <p className="font-semibold text-foreground dark:text-white">
+                    {activeResult?.drawing_type || previewLabel}
+                  </p>
+                  <p className="text-sm text-primary mt-1">
+                    Drawing Score: {activeScoreText}
+                  </p>
                 </div>
 
                 <div className="text-center mt-8">
-                  <p className="tracking-[0.2em] text-xs text-muted-foreground dark:text-gray-400">MOTOR IMPAIRMENT SCORE</p>
+                  <p className="tracking-[0.2em] text-xs text-muted-foreground dark:text-gray-400">
+                    MOTOR IMPAIRMENT SCORE
+                  </p>
                   <p className="text-sm text-muted-foreground dark:text-gray-400 mb-2">
                     for {patientData?.fullName || "Patient"}
                   </p>
                   <p className="text-7xl font-bold text-amber-500 leading-none">
-                    {activeScoreText}<span className="text-4xl text-muted-foreground">/100</span>
+                    {activeScoreText}
+                    <span className="text-4xl text-muted-foreground">/100</span>
                   </p>
                   <p className="mt-3 text-3xl font-bold text-foreground dark:text-white uppercase">
                     {activeSeverity}
@@ -547,82 +613,77 @@ export default function DrawingAnalysisPage() {
                     <span>Marked (71+)</span>
                   </div>
                   <div className="h-3 rounded-full bg-secondary dark:bg-[#0f1219] overflow-hidden">
-                    <div className="h-full bg-primary" style={{ width: activeProgressWidth }} />
+                    <div
+                      className="h-full bg-primary"
+                      style={{ width: activeProgressWidth }}
+                    />
                   </div>
                 </div>
 
                 <div className="mt-6 bg-secondary dark:bg-[#0f1219] rounded-lg p-4">
-                  <p className="text-sm text-muted-foreground dark:text-gray-400">Severity Level:</p>
-                  <p className="text-xl font-semibold text-amber-500">{activeSeverity}</p>
+                  <p className="text-sm text-muted-foreground dark:text-gray-400">
+                    Severity Level:
+                  </p>
+                  <p className="text-xl font-semibold text-amber-500">
+                    {activeSeverity}
+                  </p>
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-6">
-                  <h4 className="text-2xl font-bold text-foreground dark:text-white mb-4">What is Drawing Analysis?</h4>
+                  <h4 className="text-2xl font-bold text-foreground dark:text-white mb-4">
+                    What is Drawing Analysis?
+                  </h4>
                   <p className="text-sm text-muted-foreground dark:text-gray-400 mb-4">
-                    Drawing analysis helps screen fine motor control by measuring tremor, pressure irregularity, and movement smoothness in spiral or wave patterns.
+                    Drawing analysis helps screen fine motor control by
+                    measuring tremor, pressure irregularity, and movement
+                    smoothness in spiral or wave patterns.
                   </p>
                   <ul className="space-y-2 text-sm text-foreground dark:text-white">
-                    <li><span className="font-semibold">0-20:</span> Stable - smooth and consistent motion</li>
-                    <li><span className="font-semibold">21-40:</span> Mild - small variations in drawing control</li>
-                    <li><span className="font-semibold">41-70:</span> Moderate - visible irregular patterns</li>
-                    <li><span className="font-semibold">71+:</span> Marked - strong motor irregularity</li>
+                    <li>
+                      <span className="font-semibold">0-20:</span> Stable -
+                      smooth and consistent motion
+                    </li>
+                    <li>
+                      <span className="font-semibold">21-40:</span> Mild - small
+                      variations in drawing control
+                    </li>
+                    <li>
+                      <span className="font-semibold">41-70:</span> Moderate -
+                      visible irregular patterns
+                    </li>
+                    <li>
+                      <span className="font-semibold">71+:</span> Marked -
+                      strong motor irregularity
+                    </li>
                   </ul>
                 </div>
 
                 <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-6">
-                  <h4 className="text-2xl font-bold text-foreground dark:text-white mb-4">Your Result</h4>
+                  <h4 className="text-2xl font-bold text-foreground dark:text-white mb-4">
+                    Your Result
+                  </h4>
                   <div className="bg-secondary dark:bg-[#0f1219] rounded-lg p-6 text-center mb-4">
-                    <p className="text-5xl font-bold text-amber-500">{activeScoreText}</p>
-                    <p className="text-2xl font-semibold text-foreground dark:text-white mt-2">{activeSeverity}</p>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400 mt-2">{activeSeverityDescription}</p>
+                    <p className="text-5xl font-bold text-amber-500">
+                      {activeScoreText}
+                    </p>
+                    <p className="text-2xl font-semibold text-foreground dark:text-white mt-2">
+                      {activeSeverity}
+                    </p>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400 mt-2">
+                      {activeSeverityDescription}
+                    </p>
                   </div>
                   <p className="text-xs text-muted-foreground dark:text-gray-400">
-                    Important: This is a screening tool based on drawing analysis only. Please consult a healthcare professional for proper diagnosis and treatment.
+                    Important: This is a screening tool based on drawing
+                    analysis only. Please consult a healthcare professional for
+                    proper diagnosis and treatment.
                   </p>
                 </div>
               </div>
 
-              <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-6">
-                <h4 className="text-3xl font-bold text-foreground dark:text-white mb-1">Recommendations</h4>
-                <p className="text-sm text-muted-foreground dark:text-gray-400 mb-4">Based on your drawing analysis results</p>
-                <div className="space-y-3">
-                  {[
-                    "Consider a neurologic evaluation if fine motor changes are persistent",
-                    "Repeat the drawing test periodically to monitor changes over time",
-                    "Practice hand coordination exercises if recommended",
-                    "Use a stable surface and comfortable writing posture",
-                    "Share results with your clinician during follow-up visits",
-                  ].map((item) => (
-                    <div key={item} className="flex items-center gap-3 rounded-lg bg-secondary dark:bg-[#0f1219] p-3">
-                      <CircleCheck className="w-4 h-4 text-primary shrink-0" />
-                      <p className="text-sm text-foreground dark:text-white">{item}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              <div className="bg-card dark:bg-[#161b26] rounded-2xl border border-border dark:border-white/10 p-6">
-                <h4 className="text-2xl font-semibold text-foreground dark:text-white mb-4">
-                  Submission Summary
-                </h4>
-                <div className="grid sm:grid-cols-2 gap-4 text-base">
-                  <p className="text-muted-foreground dark:text-gray-400">Patient:</p>
-                  <p className="text-foreground dark:text-white font-semibold">{patientData?.fullName || "N/A"}</p>
-
-                  <p className="text-muted-foreground dark:text-gray-400">Age:</p>
-                  <p className="text-foreground dark:text-white font-semibold">{patientData?.age || "N/A"}</p>
-
-                  <p className="text-muted-foreground dark:text-gray-400">Gender:</p>
-                  <p className="text-foreground dark:text-white font-semibold capitalize">{patientData?.gender || "N/A"}</p>
-
-                  <p className="text-muted-foreground dark:text-gray-400">Drawing:</p>
-                  <p className="text-foreground dark:text-white font-semibold break-all">
-                    {previewFile ? `${previewLabel} (${formatFileSize(previewFile.size)})` : "N/A"}
-                  </p>
-                </div>
-              </div>
 
               <div className="flex justify-between mt-8">
                 <Button
@@ -649,8 +710,14 @@ export default function DrawingAnalysisPage() {
         onOpenChange={setResultActionsOpen}
         completedAnalysisLabel="drawing"
         primaryActions={[
-          { label: "Continue to Voice Analysis", onClick: () => closeDialogAndNavigate("/analysis/voice") },
-          { label: "Continue to Gait Analysis", onClick: () => closeDialogAndNavigate("/analysis/gait") },
+          {
+            label: "Continue to Voice Analysis",
+            onClick: () => closeDialogAndNavigate("/analysis/voice"),
+          },
+          {
+            label: "Continue to Gait Analysis",
+            onClick: () => closeDialogAndNavigate("/analysis/gait"),
+          },
         ]}
         onViewCurrentResult={() => {
           setResultActionsOpen(false);

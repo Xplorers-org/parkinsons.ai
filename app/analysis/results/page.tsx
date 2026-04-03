@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnalysisSidebar } from "@/components/analysis/analysis-sidebar";
 import { Button } from "@/components/ui/button";
-import { Database, Download, Eye, FileText, RefreshCw } from "lucide-react";
+import { Database, Eye } from "lucide-react";
 
 type AnalysisHistoryItem = {
   id: string;
@@ -32,9 +32,24 @@ const SUMMARY_CARDS: Array<{
   color: string;
   route: string;
 }> = [
-  { label: "Voice Analysis", key: "voice", color: "text-cyan-500", route: "/analysis/voice" },
-  { label: "Gait Analysis", key: "gait", color: "text-amber-500", route: "/analysis/gait" },
-  { label: "Drawing Analysis", key: "drawing", color: "text-emerald-500", route: "/analysis/drawing" },
+  {
+    label: "Voice Analysis",
+    key: "voice",
+    color: "text-cyan-500",
+    route: "/analysis/voice",
+  },
+  {
+    label: "Drawing Analysis",
+    key: "drawing",
+    color: "text-emerald-500",
+    route: "/analysis/drawing",
+  },
+  {
+    label: "Gait Analysis",
+    key: "gait",
+    color: "text-amber-500",
+    route: "/analysis/gait",
+  },
 ];
 
 const getStringValue = (value: unknown, fallback = "") => {
@@ -71,12 +86,22 @@ const getDateValue = (row: DbHistoryRow) => {
     new Date().toISOString();
 
   const parsed = new Date(candidate);
-  return Number.isNaN(parsed.getTime()) ? new Date(0).toISOString() : parsed.toISOString();
+  return Number.isNaN(parsed.getTime())
+    ? new Date(0).toISOString()
+    : parsed.toISOString();
 };
 
-const inferAnalysisType = (row: DbHistoryRow): AnalysisHistoryItem["type"] | null => {
-  const explicitType = getStringValue(row.type || row.analysis_type).toLowerCase();
-  if (explicitType === "voice" || explicitType === "gait" || explicitType === "drawing") {
+const inferAnalysisType = (
+  row: DbHistoryRow,
+): AnalysisHistoryItem["type"] | null => {
+  const explicitType = getStringValue(
+    row.type || row.analysis_type,
+  ).toLowerCase();
+  if (
+    explicitType === "voice" ||
+    explicitType === "gait" ||
+    explicitType === "drawing"
+  ) {
     return explicitType;
   }
 
@@ -92,7 +117,10 @@ const inferAnalysisType = (row: DbHistoryRow): AnalysisHistoryItem["type"] | nul
     return "gait";
   }
 
-  if (row.motor_impairment_score !== undefined || row.drawing_type !== undefined) {
+  if (
+    row.motor_impairment_score !== undefined ||
+    row.drawing_type !== undefined
+  ) {
     return "drawing";
   }
 
@@ -160,16 +188,21 @@ export default function ResultsPage() {
   const [patientData, setPatientData] = useState<PatientSummary | null>(null);
   const [history, setHistory] = useState<AnalysisHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const sortedHistory = useMemo(
-    () => [...history].sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()),
+    () =>
+      [...history].sort(
+        (a, b) =>
+          new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime(),
+      ),
     [history],
   );
 
   const latestSummary = useMemo(() => {
-    const latestByType: Partial<Record<AnalysisHistoryItem["type"], AnalysisHistoryItem>> = {};
+    const latestByType: Partial<
+      Record<AnalysisHistoryItem["type"], AnalysisHistoryItem>
+    > = {};
 
     for (const item of sortedHistory) {
       if (!latestByType[item.type]) {
@@ -189,8 +222,13 @@ export default function ResultsPage() {
   }, [sortedHistory]);
 
   const loadHistory = async () => {
-    const storedData = typeof window === "undefined" ? null : sessionStorage.getItem("patientData");
-    const parsedPatient = storedData ? (JSON.parse(storedData) as PatientSummary) : null;
+    const storedData =
+      typeof window === "undefined"
+        ? null
+        : sessionStorage.getItem("patientData");
+    const parsedPatient = storedData
+      ? (JSON.parse(storedData) as PatientSummary)
+      : null;
     setPatientData(parsedPatient);
 
     if (!parsedPatient?.patientId) {
@@ -203,7 +241,9 @@ export default function ResultsPage() {
     setError(null);
 
     try {
-      const res = await fetch(`/api/patients/${encodeURIComponent(parsedPatient.patientId)}/history`);
+      const res = await fetch(
+        `/api/patients/${encodeURIComponent(parsedPatient.patientId)}/history`,
+      );
 
       if (res.status === 404) {
         setHistory([]);
@@ -229,11 +269,14 @@ export default function ResultsPage() {
 
       setHistory(normalized);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Unable to load results.");
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Unable to load results.",
+      );
       setHistory([]);
     } finally {
       setIsLoading(false);
-      setIsRefreshing(false);
     }
   };
 
@@ -242,51 +285,6 @@ export default function ResultsPage() {
   }, []);
 
   const getProgress = () => ({ current: 4, total: 4 });
-
-  const downloadFile = (fileName: string, content: string, mimeType: string) => {
-    const blob = new Blob([content], { type: mimeType });
-    const objectUrl = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = objectUrl;
-    link.download = fileName;
-    link.click();
-    URL.revokeObjectURL(objectUrl);
-  };
-
-  const handleDownloadJson = () => {
-    const payload = {
-      patient: patientData,
-      generatedAt: new Date().toISOString(),
-      summary: latestSummary,
-      history: sortedHistory,
-    };
-
-    downloadFile("analysis-history-summary.json", JSON.stringify(payload, null, 2), "application/json");
-  };
-
-  const handleDownloadCsv = () => {
-    const headers = ["Type", "Source", "File Name", "File Size", "Score", "Severity", "Submitted At"];
-    const rows = sortedHistory.map((item) => [
-      item.type,
-      item.source,
-      item.fileName,
-      item.fileSize,
-      String(item.score ?? "N/A"),
-      item.severity ?? "N/A",
-      new Date(item.submittedAt).toLocaleString(),
-    ]);
-
-    const csvData = [headers, ...rows]
-      .map((row) => row.map((cell) => `"${String(cell).replaceAll("\"", "\"\"")}"`).join(","))
-      .join("\n");
-
-    downloadFile("analysis-history-summary.csv", csvData, "text/csv;charset=utf-8;");
-  };
-
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    void loadHistory();
-  };
 
   return (
     <div className="flex min-h-screen bg-background dark:bg-[#0a0e17]">
@@ -300,19 +298,29 @@ export default function ResultsPage() {
         <div className="max-w-5xl mx-auto px-8 py-12">
           <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground dark:text-white">Results</h1>
-              <p className="text-muted-foreground dark:text-gray-400 mt-2">Combined summary and database history for all 3 analyses.</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground dark:text-white">
+                Results
+              </h1>
+              <p className="text-muted-foreground dark:text-gray-400 mt-2">
+                Combined summary for all 3 analyses.
+              </p>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground dark:text-gray-400">
               <Database className="w-4 h-4 text-primary" />
               <span>Synced from database</span>
-              {latestSubmittedAt && <span className="hidden md:inline">• Latest update {latestSubmittedAt}</span>}
+              {latestSubmittedAt && (
+                <span className="hidden md:inline">
+                  • Latest update {latestSubmittedAt}
+                </span>
+              )}
             </div>
           </div>
 
           {error && (
             <div className="bg-amber-500/10 dark:bg-amber-900/20 border border-amber-500/30 dark:border-amber-500/20 rounded-xl px-5 py-4 mb-6">
-              <p className="text-sm text-amber-700 dark:text-amber-400">{error}</p>
+              <p className="text-sm text-amber-700 dark:text-amber-400">
+                {error}
+              </p>
             </div>
           )}
 
@@ -328,23 +336,41 @@ export default function ResultsPage() {
           ) : (
             <>
               <div className="bg-card dark:bg-[#161b26] rounded-2xl border border-border dark:border-white/10 p-6 mb-6">
-                <h3 className="text-lg font-semibold text-foreground dark:text-white mb-4">Patient Summary</h3>
+                <h3 className="text-lg font-semibold text-foreground dark:text-white mb-4">
+                  Patient Summary
+                </h3>
                 <div className="grid md:grid-cols-4 gap-4 text-sm">
                   <div className="bg-secondary dark:bg-[#0f1219] rounded-lg p-4">
-                    <p className="text-muted-foreground dark:text-gray-400">Name</p>
-                    <p className="font-semibold text-foreground dark:text-white">{patientData?.fullName || "N/A"}</p>
+                    <p className="text-muted-foreground dark:text-gray-400">
+                      Name
+                    </p>
+                    <p className="font-semibold text-foreground dark:text-white">
+                      {patientData?.fullName || "N/A"}
+                    </p>
                   </div>
                   <div className="bg-secondary dark:bg-[#0f1219] rounded-lg p-4">
-                    <p className="text-muted-foreground dark:text-gray-400">Patient ID</p>
-                    <p className="font-semibold text-foreground dark:text-white">{patientData?.patientId || "N/A"}</p>
+                    <p className="text-muted-foreground dark:text-gray-400">
+                      Patient ID
+                    </p>
+                    <p className="font-semibold text-foreground dark:text-white">
+                      {patientData?.patientId || "N/A"}
+                    </p>
                   </div>
                   <div className="bg-secondary dark:bg-[#0f1219] rounded-lg p-4">
-                    <p className="text-muted-foreground dark:text-gray-400">Age</p>
-                    <p className="font-semibold text-foreground dark:text-white">{patientData?.age || "N/A"}</p>
+                    <p className="text-muted-foreground dark:text-gray-400">
+                      Age
+                    </p>
+                    <p className="font-semibold text-foreground dark:text-white">
+                      {patientData?.age || "N/A"}
+                    </p>
                   </div>
                   <div className="bg-secondary dark:bg-[#0f1219] rounded-lg p-4">
-                    <p className="text-muted-foreground dark:text-gray-400">Gender</p>
-                    <p className="font-semibold text-foreground dark:text-white capitalize">{patientData?.gender || "N/A"}</p>
+                    <p className="text-muted-foreground dark:text-gray-400">
+                      Gender
+                    </p>
+                    <p className="font-semibold text-foreground dark:text-white capitalize">
+                      {patientData?.gender || "N/A"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -355,12 +381,29 @@ export default function ResultsPage() {
                   const hasScore = typeof result?.score === "number";
 
                   return (
-                    <div key={card.key} className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-5">
-                      <p className="text-sm text-muted-foreground dark:text-gray-400">{card.label}</p>
-                      <p className={`text-3xl font-bold mt-2 ${card.color}`}>{hasScore ? result.score!.toFixed(1) : "N/A"}</p>
-                      <p className="text-sm text-foreground dark:text-white mt-1">{result?.severity || "Pending"}</p>
-                      <p className="text-xs text-muted-foreground dark:text-gray-400 mt-2">{result ? new Date(result.submittedAt).toLocaleString() : "No submission yet"}</p>
-                      <Button variant="outline" onClick={() => router.push(card.route)} className="mt-4 w-full border-border dark:border-white/10">
+                    <div
+                      key={card.key}
+                      className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-5"
+                    >
+                      <p className="text-sm text-muted-foreground dark:text-gray-400">
+                        {card.label}
+                      </p>
+                      <p className={`text-3xl font-bold mt-2 ${card.color}`}>
+                        {hasScore ? result.score!.toFixed(1) : "N/A"}
+                      </p>
+                      <p className="text-sm text-foreground dark:text-white mt-1">
+                        {result?.severity || "Pending"}
+                      </p>
+                      <p className="text-xs text-muted-foreground dark:text-gray-400 mt-2">
+                        {result
+                          ? new Date(result.submittedAt).toLocaleString()
+                          : "No submission yet"}
+                      </p>
+                      <Button
+                        variant="outline"
+                        onClick={() => router.push(card.route)}
+                        className="mt-4 w-full border-border dark:border-white/10"
+                      >
                         <Eye className="w-4 h-4 mr-2" />
                         View
                       </Button>
@@ -369,69 +412,13 @@ export default function ResultsPage() {
                 })}
               </div>
 
-              <div className="bg-card dark:bg-[#161b26] rounded-2xl border border-border dark:border-white/10 p-6 mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-foreground dark:text-white">Analysis History</h3>
-                  <div className="flex gap-2">
-                    <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing} className="border-border dark:border-white/10">
-                      <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
-                      Refresh
-                    </Button>
-                    <Button variant="outline" onClick={handleDownloadCsv} className="border-border dark:border-white/10">
-                      <Download className="w-4 h-4 mr-2" />
-                      Download CSV
-                    </Button>
-                    <Button onClick={handleDownloadJson} className="bg-primary hover:bg-primary/90">
-                      <FileText className="w-4 h-4 mr-2" />
-                      Download JSON
-                    </Button>
-                  </div>
-                </div>
-
-                {sortedHistory.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-border dark:border-white/10 bg-secondary/50 dark:bg-[#0f1219] p-6 text-sm text-muted-foreground dark:text-gray-400">
-                    No database analysis history available yet for this patient.
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="text-left border-b border-border dark:border-white/10">
-                          <th className="py-3 pr-4">Type</th>
-                          <th className="py-3 pr-4">Source</th>
-                          <th className="py-3 pr-4">File</th>
-                          <th className="py-3 pr-4">Score</th>
-                          <th className="py-3 pr-4">Severity</th>
-                          <th className="py-3 pr-4">Date</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {sortedHistory.map((item) => (
-                          <tr key={item.id} className="border-b border-border/60 dark:border-white/10">
-                            <td className="py-3 pr-4 capitalize text-foreground dark:text-white">{item.type}</td>
-                            <td className="py-3 pr-4 text-muted-foreground dark:text-gray-400">{item.source}</td>
-                            <td className="py-3 pr-4 text-muted-foreground dark:text-gray-400">{item.fileName}</td>
-                            <td className="py-3 pr-4 text-foreground dark:text-white">{item.score !== undefined ? item.score.toFixed(1) : "N/A"}</td>
-                            <td className="py-3 pr-4 text-foreground dark:text-white">{item.severity || "N/A"}</td>
-                            <td className="py-3 pr-4 text-muted-foreground dark:text-gray-400">{new Date(item.submittedAt).toLocaleString()}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-card dark:bg-[#161b26] rounded-2xl border border-border dark:border-white/10 p-6 mb-6">
-                <h3 className="text-lg font-semibold text-foreground dark:text-white mb-2">UI Suggestion</h3>
-                <p className="text-sm text-muted-foreground dark:text-gray-400">
-                  A useful next addition here is a compact trend strip under the three cards showing whether each score improved or worsened compared with the previous database record.
-                </p>
-              </div>
-
               <div className="flex gap-4">
-                <Button variant="outline" onClick={() => router.push("/analysis/dashboard")} className="border-border dark:border-white/10">
-                  Back to Dashboard
+                <Button
+                  variant="outline"
+                  onClick={() => router.push("/analysis/progress")}
+                  className="border-border dark:border-white/10"
+                >
+                  Open Progress
                 </Button>
                 <Button
                   onClick={() => {
