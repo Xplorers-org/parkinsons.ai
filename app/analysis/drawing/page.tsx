@@ -21,6 +21,7 @@ const drawingSteps = [
 
 type PatientSessionData = {
   fullName?: string;
+  patientId?: string;
   gender?: string;
   age?: string | number;
 };
@@ -592,6 +593,9 @@ export default function DrawingAnalysisPage() {
                   </h4>
                   <p className="text-sm text-foreground dark:text-white">
                     Patient : <span className="font-semibold text-primary">{patientData?.fullName || "N/A"}</span>
+                  </p>
+                  <p className="text-sm text-foreground dark:text-white">
+                    Patient Id : <span className="font-semibold text-primary">{patientData?.patientId || "N/A"}</span>
                   </p>
                   <p className="text-sm text-foreground dark:text-white">
                     Drawing Type : <span className="font-semibold text-primary">{activeResult?.drawing_type || previewLabel}</span>
