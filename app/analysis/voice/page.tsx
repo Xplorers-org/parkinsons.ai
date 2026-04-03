@@ -8,7 +8,7 @@ import { VoiceAnalysis } from "@/components/analysis/voice-analysis";
 import { PatientData } from "@/components/analysis/patient-info-form";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 
 const voiceSteps = [
   { id: 1, title: "Upload/Record", subtitle: "Voice sample" },
@@ -30,14 +30,18 @@ export default function VoiceAnalysisPage() {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [audioData, setAudioData] = useState<File | Blob | null>(null);
-  const [voiceResult, setVoiceResult] = useState<VoiceAnalysisResult | null>(null);
-  const [completedSteps, setCompletedSteps] = useState<string[]>(["patient-info"]);
+  const [voiceResult, setVoiceResult] = useState<VoiceAnalysisResult | null>(
+    null,
+  );
+  const [completedSteps, setCompletedSteps] = useState<string[]>([
+    "patient-info",
+  ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const storedData = sessionStorage.getItem("patientData");
     if (storedData) setPatientData(JSON.parse(storedData));
-    
+
     const storedSession = sessionStorage.getItem("sessionId");
     if (storedSession) setSessionId(storedSession);
 
@@ -71,7 +75,7 @@ export default function VoiceAnalysisPage() {
       formData.append("patient_id", patientData.patientId);
       formData.append("age", patientData.age);
       formData.append("sex", patientData.gender);
-      
+
       formData.append("audio_file", audioData, "voice_sample.webm");
 
       const res = await fetch("/api/analyze/voice", {
@@ -96,12 +100,12 @@ export default function VoiceAnalysisPage() {
       sessionStorage.setItem("voiceResult", JSON.stringify(result));
       toast.success("Voice analysis complete.");
 
-      const audioName = audioData instanceof File ? audioData.name : "recorded-sample.webm";
+      const audioName =
+        audioData instanceof File ? audioData.name : "recorded-sample.webm";
       const audioSize = formatFileSize(audioData.size);
       const existingHistory = sessionStorage.getItem("analysisHistory");
-      const parsedHistory: Array<Record<string, string | number>> = existingHistory
-        ? JSON.parse(existingHistory)
-        : [];
+      const parsedHistory: Array<Record<string, string | number>> =
+        existingHistory ? JSON.parse(existingHistory) : [];
 
       const severity = getSeverityFromPrediction(result.prediction);
       parsedHistory.push({
@@ -158,8 +162,10 @@ export default function VoiceAnalysisPage() {
 
   const getSeverityDescription = (severity: string) => {
     if (severity === "Mild") return "Very light or early signs.";
-    if (severity === "Moderate") return "Some tremor, speech changes, or slower movement possible.";
-    if (severity === "Advanced") return "Noticeable speech or movement difficulties.";
+    if (severity === "Moderate")
+      return "Some tremor, speech changes, or slower movement possible.";
+    if (severity === "Advanced")
+      return "Noticeable speech or movement difficulties.";
     return "Significant motor impairment may be present.";
   };
 
@@ -167,7 +173,9 @@ export default function VoiceAnalysisPage() {
   const formattedUpdrsScore =
     typeof updrsScore === "number" ? updrsScore.toFixed(1) : "N/A";
   const severityLabel =
-    typeof updrsScore === "number" ? getSeverityFromPrediction(updrsScore) : "Pending";
+    typeof updrsScore === "number"
+      ? getSeverityFromPrediction(updrsScore)
+      : "Pending";
   const severityDescription = getSeverityDescription(severityLabel);
   const progressWidth =
     typeof updrsScore === "number"
@@ -215,7 +223,7 @@ export default function VoiceAnalysisPage() {
               <p className="text-sm text-muted-foreground dark:text-gray-400 mb-6">
                 Review your recording
               </p>
-              
+
               {audioData && (
                 <div className="bg-secondary dark:bg-[#0f1219] rounded-xl p-6 mb-6">
                   <audio
@@ -247,16 +255,18 @@ export default function VoiceAnalysisPage() {
           {voiceStep === 3 && (
             <div className="space-y-6">
               <div className="bg-card dark:bg-[#161b26] rounded-2xl border border-border dark:border-white/10 p-10 text-center">
-            <div className="flex  items-center mb-2">
+                <div className="flex  items-center mb-2">
                   <div className="w-18 h-18 rounded-full bg-primary/15 flex items-center justify-center  mb-6">
-                  <CheckCircle2 className="w-10 h-10 text-primary" />
+                    <CheckCircle2 className="w-10 h-10 text-primary" />
+                  </div>
+                  <h3 className="text-4xl font-bold text-foreground dark:text-white mb-4 mx-15">
+                    Ready for UPDRS Analysis
+                  </h3>
                 </div>
-                <h3 className="text-4xl font-bold text-foreground dark:text-white mb-4 mx-15">
-                  Ready for UPDRS Analysis
-                </h3>
-            </div>
                 <p className="text-md text-muted-foreground dark:text-gray-300 max-w-3xl mx-auto">
-                  Your voice sample will be analyzed using our AI model to estimate UPDRS motor symptoms related to Parkinson&apos;s disease.
+                  Your voice sample will be analyzed using our AI model to
+                  estimate UPDRS motor symptoms related to Parkinson&apos;s
+                  disease.
                 </p>
               </div>
 
@@ -265,18 +275,34 @@ export default function VoiceAnalysisPage() {
                   Submission Summary
                 </h4>
                 <div className="grid sm:grid-cols-2 gap-4 text-base">
-                  <p className="text-muted-foreground dark:text-gray-400">Patient:</p>
-                  <p className="text-foreground dark:text-white font-semibold">{patientData?.fullName || "N/A"}</p>
+                  <p className="text-muted-foreground dark:text-gray-400">
+                    Patient:
+                  </p>
+                  <p className="text-foreground dark:text-white font-semibold">
+                    {patientData?.fullName || "N/A"}
+                  </p>
 
-                  <p className="text-muted-foreground dark:text-gray-400">Age:</p>
-                  <p className="text-foreground dark:text-white font-semibold">{patientData?.age || "N/A"} years</p>
+                  <p className="text-muted-foreground dark:text-gray-400">
+                    Age:
+                  </p>
+                  <p className="text-foreground dark:text-white font-semibold">
+                    {patientData?.age || "N/A"} years
+                  </p>
 
-                  <p className="text-muted-foreground dark:text-gray-400">Gender:</p>
-                  <p className="text-foreground dark:text-white font-semibold capitalize">{patientData?.gender || "N/A"}</p>
+                  <p className="text-muted-foreground dark:text-gray-400">
+                    Gender:
+                  </p>
+                  <p className="text-foreground dark:text-white font-semibold capitalize">
+                    {patientData?.gender || "N/A"}
+                  </p>
 
-                  <p className="text-muted-foreground dark:text-gray-400">Audio:</p>
+                  <p className="text-muted-foreground dark:text-gray-400">
+                    Audio:
+                  </p>
                   <p className="text-foreground dark:text-white font-semibold break-all">
-                    {audioData ? `${audioData instanceof File ? audioData.name : "recorded-sample.webm"} (${formatFileSize(audioData.size)})` : "N/A"}
+                    {audioData
+                      ? `${audioData instanceof File ? audioData.name : "recorded-sample.webm"} (${formatFileSize(audioData.size)})`
+                      : "N/A"}
                   </p>
                 </div>
               </div>
@@ -328,19 +354,28 @@ export default function VoiceAnalysisPage() {
                       Analysis Results
                     </h3>
                     <p className="text-sm text-muted-foreground dark:text-gray-400 mt-2">
-                      Detailed results of your voice analysis for Parkinson&apos;s disease prediction.
+                      Detailed results of your voice analysis for
+                      Parkinson&apos;s disease prediction.
                     </p>
                   </div>
                   <AlertTriangle className="w-6 h-6 text-amber-500 shrink-0" />
                 </div>
 
                 <div className="mt-6 rounded-xl border border-primary/40 dark:border-primary/30 border-l-4 p-5 bg-primary/5 dark:bg-primary/10">
-                  <h4 className="text-xl font-semibold text-primary mb-2">Analysis Complete</h4>
+                  <h4 className="text-xl font-semibold text-primary mb-2">
+                    Analysis Complete
+                  </h4>
                   <p className="text-sm text-foreground dark:text-white">
-                    Patient: <span className="font-semibold text-primary">{patientData?.fullName || "N/A"}</span>
+                    Patient:{" "}
+                    <span className="font-semibold text-primary">
+                      {patientData?.fullName || "N/A"}
+                    </span>
                   </p>
                   <p className="text-lg font-semibold text-foreground dark:text-white mt-2">
-                    UPDRS Prediction: <span className="text-amber-500">{formattedUpdrsScore}</span>
+                    UPDRS Prediction:{" "}
+                    <span className="text-amber-500">
+                      {formattedUpdrsScore}
+                    </span>
                     <span className="text-muted-foreground"> / 108</span>
                     <span className="ml-3 text-xs bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 px-2.5 py-1 rounded-full align-middle">
                       {severityLabel}
@@ -349,18 +384,27 @@ export default function VoiceAnalysisPage() {
                 </div>
 
                 <div className="mt-6 bg-secondary dark:bg-[#0f1219] rounded-lg p-4 inline-block">
-                  <p className="text-sm text-muted-foreground dark:text-gray-400">Patient</p>
-                  <p className="font-semibold text-foreground dark:text-white">{patientData?.fullName || "N/A"}</p>
-                  <p className="text-sm text-primary mt-1">UPDRS Prediction: {formattedUpdrsScore}</p>
+                  <p className="text-sm text-muted-foreground dark:text-gray-400">
+                    Patient
+                  </p>
+                  <p className="font-semibold text-foreground dark:text-white">
+                    {patientData?.fullName || "N/A"}
+                  </p>
+                  <p className="text-sm text-primary mt-1">
+                    UPDRS Prediction: {formattedUpdrsScore}
+                  </p>
                 </div>
 
                 <div className="text-center mt-8">
-                  <p className="tracking-[0.2em] text-xs text-muted-foreground dark:text-gray-400">UPDRS PREDICTION SCORE</p>
+                  <p className="tracking-[0.2em] text-xs text-muted-foreground dark:text-gray-400">
+                    UPDRS PREDICTION SCORE
+                  </p>
                   <p className="text-sm text-muted-foreground dark:text-gray-400 mb-2">
                     for {patientData?.fullName || "Patient"}
                   </p>
                   <p className="text-7xl font-bold text-amber-500 leading-none">
-                    {formattedUpdrsScore}<span className="text-4xl text-muted-foreground">/108</span>
+                    {formattedUpdrsScore}
+                    <span className="text-4xl text-muted-foreground">/108</span>
                   </p>
                   <p className="mt-3 text-3xl font-bold text-foreground dark:text-white uppercase">
                     {severityLabel} Severity
@@ -378,34 +422,55 @@ export default function VoiceAnalysisPage() {
                     <span>Severe (61+)</span>
                   </div>
                   <div className="h-3 rounded-full bg-secondary dark:bg-[#0f1219] overflow-hidden">
-                    <div className="h-full bg-primary" style={{ width: progressWidth }} />
+                    <div
+                      className="h-full bg-primary"
+                      style={{ width: progressWidth }}
+                    />
                   </div>
                 </div>
 
                 <div className="mt-6 bg-secondary dark:bg-[#0f1219] rounded-lg p-4">
-                  <p className="text-sm text-muted-foreground dark:text-gray-400">Severity Level:</p>
-                  <p className="text-xl font-semibold text-amber-500">{severityLabel}</p>
+                  <p className="text-sm text-muted-foreground dark:text-gray-400">
+                    Severity Level:
+                  </p>
+                  <p className="text-xl font-semibold text-amber-500">
+                    {severityLabel}
+                  </p>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-border dark:border-white/10">
-                  <span className="text-muted-foreground dark:text-gray-400">Patient ID</span>
+                  <span className="text-muted-foreground dark:text-gray-400">
+                    Patient ID
+                  </span>
                   <span className="font-medium text-foreground dark:text-white">
                     {patientData?.patientId || "N/A"}
                   </span>
                 </div>
 
                 <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-6">
-                  <h4 className="text-2xl font-bold text-foreground dark:text-white mb-4">Your Result</h4>
+                  <h4 className="text-2xl font-bold text-foreground dark:text-white mb-4">
+                    Your Result
+                  </h4>
                   <div className="bg-secondary dark:bg-[#0f1219] rounded-lg p-6 text-center mb-4">
-                    <p className="text-5xl font-bold text-amber-500">{formattedUpdrsScore}</p>
-                    <p className="text-2xl font-semibold text-foreground dark:text-white mt-2">{severityLabel} severity</p>
-                    <p className="text-sm text-muted-foreground dark:text-gray-400 mt-2">{severityDescription}</p>
+                    <p className="text-5xl font-bold text-amber-500">
+                      {formattedUpdrsScore}
+                    </p>
+                    <p className="text-2xl font-semibold text-foreground dark:text-white mt-2">
+                      {severityLabel} severity
+                    </p>
+                    <p className="text-sm text-muted-foreground dark:text-gray-400 mt-2">
+                      {severityDescription}
+                    </p>
                   </div>
                   <p className="text-xs text-muted-foreground dark:text-gray-400">
-                    Important: This is a screening tool based on voice analysis only. Please consult a healthcare professional for proper diagnosis and treatment.
+                    Important: This is a screening tool based on voice analysis
+                    only. Please consult a healthcare professional for proper
+                    diagnosis and treatment.
                   </p>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-border dark:border-white/10">
-                  <span className="text-muted-foreground dark:text-gray-400">Age</span>
+                  <span className="text-muted-foreground dark:text-gray-400">
+                    Age
+                  </span>
                   <span className="font-medium text-foreground dark:text-white">
                     {patientData?.age || "N/A"}
                   </span>
@@ -413,26 +478,45 @@ export default function VoiceAnalysisPage() {
               </div>
 
               <div className="bg-card dark:bg-[#161b26] rounded-xl border border-border dark:border-white/10 p-6">
-                <h4 className="text-lg font-semibold text-foreground dark:text-white mb-3">Debug API Data (Temporary)</h4>
+                <h4 className="text-lg font-semibold text-foreground dark:text-white mb-3">
+                  Debug API Data (Temporary)
+                </h4>
                 <p className="text-xs text-muted-foreground dark:text-gray-400 mb-3">
-                  Use this panel to verify the exact response returned by <span className="font-mono">/api/analyze/voice</span>.
+                  Use this panel to verify the exact response returned by{" "}
+                  <span className="font-mono">/api/analyze/voice</span>.
                 </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground dark:text-gray-400">prediction</span>
-                    <span className="text-foreground dark:text-white font-medium">{voiceResult?.prediction ?? "N/A"}</span>
+                    <span className="text-muted-foreground dark:text-gray-400">
+                      prediction
+                    </span>
+                    <span className="text-foreground dark:text-white font-medium">
+                      {voiceResult?.prediction ?? "N/A"}
+                    </span>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground dark:text-gray-400">test_count</span>
-                    <span className="text-foreground dark:text-white font-medium">{voiceResult?.test_count ?? "N/A"}</span>
+                    <span className="text-muted-foreground dark:text-gray-400">
+                      test_count
+                    </span>
+                    <span className="text-foreground dark:text-white font-medium">
+                      {voiceResult?.test_count ?? "N/A"}
+                    </span>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground dark:text-gray-400">processing_time_ms</span>
-                    <span className="text-foreground dark:text-white font-medium">{voiceResult?.processing_time_ms ?? "N/A"}</span>
+                    <span className="text-muted-foreground dark:text-gray-400">
+                      processing_time_ms
+                    </span>
+                    <span className="text-foreground dark:text-white font-medium">
+                      {voiceResult?.processing_time_ms ?? "N/A"}
+                    </span>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <span className="text-muted-foreground dark:text-gray-400">saved</span>
-                    <span className="text-foreground dark:text-white font-medium">{String(voiceResult?.saved ?? "N/A")}</span>
+                    <span className="text-muted-foreground dark:text-gray-400">
+                      saved
+                    </span>
+                    <span className="text-foreground dark:text-white font-medium">
+                      {String(voiceResult?.saved ?? "N/A")}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -442,18 +526,34 @@ export default function VoiceAnalysisPage() {
                   Submission Summary
                 </h4>
                 <div className="grid sm:grid-cols-2 gap-4 text-base">
-                  <p className="text-muted-foreground dark:text-gray-400">Patient:</p>
-                  <p className="text-foreground dark:text-white font-semibold">{patientData?.fullName || "N/A"}</p>
+                  <p className="text-muted-foreground dark:text-gray-400">
+                    Patient:
+                  </p>
+                  <p className="text-foreground dark:text-white font-semibold">
+                    {patientData?.fullName || "N/A"}
+                  </p>
 
-                  <p className="text-muted-foreground dark:text-gray-400">Age:</p>
-                  <p className="text-foreground dark:text-white font-semibold">{patientData?.age || "N/A"} years</p>
+                  <p className="text-muted-foreground dark:text-gray-400">
+                    Age:
+                  </p>
+                  <p className="text-foreground dark:text-white font-semibold">
+                    {patientData?.age || "N/A"} years
+                  </p>
 
-                  <p className="text-muted-foreground dark:text-gray-400">Gender:</p>
-                  <p className="text-foreground dark:text-white font-semibold capitalize">{patientData?.gender || "N/A"}</p>
+                  <p className="text-muted-foreground dark:text-gray-400">
+                    Gender:
+                  </p>
+                  <p className="text-foreground dark:text-white font-semibold capitalize">
+                    {patientData?.gender || "N/A"}
+                  </p>
 
-                  <p className="text-muted-foreground dark:text-gray-400">Audio:</p>
+                  <p className="text-muted-foreground dark:text-gray-400">
+                    Audio:
+                  </p>
                   <p className="text-foreground dark:text-white font-semibold break-all">
-                    {audioData ? `${audioData instanceof File ? audioData.name : "recorded-sample.webm"} (${formatFileSize(audioData.size)})` : "N/A"}
+                    {audioData
+                      ? `${audioData instanceof File ? audioData.name : "recorded-sample.webm"} (${formatFileSize(audioData.size)})`
+                      : "N/A"}
                   </p>
                 </div>
               </div>

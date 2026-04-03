@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { AnalysisSidebar } from "@/components/analysis/analysis-sidebar";
+import { AnalysisCompleteDialog } from "@/components/analysis/analysis-complete-dialog";
 import { StepIndicator } from "@/components/analysis/step-indicator";
 import { Button } from "@/components/ui/button";
 import { Upload, Loader2 } from "lucide-react";
