@@ -203,6 +203,7 @@ export default function ProgressPage() {
   );
   const [dateFromFilter, setDateFromFilter] = useState<string>("");
   const [dateToFilter, setDateToFilter] = useState<string>("");
+  const [isMounted, setIsMounted] = useState(false);
 
   const sortedHistory = useMemo(
     () =>
@@ -314,6 +315,9 @@ export default function ProgressPage() {
         return;
       }
 
+      // Show patient ID immediately after search
+      setPatientData({ patientId: foundPatientId });
+
       console.log("[progress] Found patient_id:", foundPatientId, "| Type:", typeof foundPatientId, "| Length:", foundPatientId?.length);
 
       // Now fetch history using the found patient_id
@@ -352,30 +356,37 @@ export default function ProgressPage() {
       console.log("[progress] Normalized items:", normalized?.length || 0);
       setHistory(normalized);
 
-      // Fetch patient details
+      // Fetch patient details - merge with existing data only if same patient
       try {
         const patientRes = await fetch(
           `/api/debug/patient/${encodeURIComponent(foundPatientId)}`
         );
+        console.log("[progress] API response status:", patientRes.status);
         if (patientRes.ok) {
           const patientInfo = await patientRes.json();
+          console.log("[progress] API response data:", patientInfo);
           const pt = patientInfo?.patient;
-          setPatientData({
-            fullName: pt?.full_name || undefined,
-            patientId: foundPatientId,
-            gender: pt?.gender || undefined,
-            age: pt?.age || undefined,
-          });
+          console.log("[progress] Patient object:", pt);
+          
+          if (pt) {
+            setPatientData({
+              fullName: pt.full_name || undefined,
+              patientId: foundPatientId,
+              gender: pt.gender || undefined,
+              age: pt.age ? String(pt.age) : undefined,
+            });
+            console.log("[progress] Updated patientData with API response");
+          } else {
+            console.log("[progress] No patient object in API response");
+            setPatientData({ patientId: foundPatientId });
+          }
         } else {
-          setPatientData({
-            patientId: foundPatientId,
-          });
+          console.log("[progress] API call failed with status:", patientRes.status);
+          setPatientData({ patientId: foundPatientId });
         }
       } catch (err) {
-        console.error("Failed to fetch patient details:", err);
-        setPatientData({
-          patientId: foundPatientId,
-        });
+        console.error("[progress] Failed to fetch patient details:", err);
+        setPatientData({ patientId: foundPatientId });
       }
     } catch (loadError) {
       setError(
@@ -404,6 +415,9 @@ export default function ProgressPage() {
         void fetchHistoryByPatientId(parsed.patientId);
       }
     }
+    
+    // Set mounted AFTER loading data from sessionStorage
+    setIsMounted(true);
   }, []);
 
   const getProgress = () => ({ current: 4, total: 4 });
@@ -531,7 +545,7 @@ export default function ProgressPage() {
             </div>
           </div>
 
-          {patientData?.fullName || patientData?.patientId ? (
+          {isMounted && (patientData?.patientId || patientData?.fullName) ? (
             <div className="bg-gradient-to-r from-primary/10 to-blue-600/10 dark:from-primary/20 dark:to-purple-500/20 rounded-2xl border border-primary/30 dark:border-primary/20 p-6 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 

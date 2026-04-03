@@ -18,15 +18,21 @@ export async function GET(
     if (patientError) throw patientError;
 
     const debug: Record<string, any> = {
-      patient: patient ? { id: patient.id, patient_id: patient.patient_id } : null,
+      patient: patient ? { 
+        id: patient.id, 
+        patient_id: patient.patient_id,
+        full_name: patient.full_name,
+        gender: patient.gender,
+        age: patient.age
+      } : null,
     };
 
     if (patient) {
-      // Get sessions
+      // Get sessions - use patient.id (UUID), not patient.patient_id (string)
       const { data: sessions, error: sessionsError } = await supabase
         .from("test_sessions")
         .select("*")
-        .eq("patient_id", patient.patient_id);
+        .eq("patient_id", patient.id);
 
       if (sessionsError) throw sessionsError;
       debug.sessions = sessions;
